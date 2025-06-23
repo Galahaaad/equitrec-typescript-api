@@ -5,4 +5,9 @@ dist/
 .DS_Store
 coverage/
 .nyc_output/
+
+# IDE and Editor files
 .idea/
+*.swp
+*.swo
+*~
