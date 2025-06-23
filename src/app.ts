@@ -1,4 +1,3 @@
-// src/app.ts
 import express from 'express';
 import { setupMiddlewares } from './middlewares';
 import routes from './routes';
