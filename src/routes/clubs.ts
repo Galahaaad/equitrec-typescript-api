@@ -6,6 +6,6 @@ const router = Router();
 
 router.get('/', authenticateToken, ClubController.getAllClubs);
 router.get('/:id', authenticateToken, ClubController.getClubById);
-router.post('/', authenticateToken, requireSuperAdmin, ClubController.createClub);
+router.post('/create', authenticateToken, requireSuperAdmin, ClubController.createClub);
 
 export default router;

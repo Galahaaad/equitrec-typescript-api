@@ -1,4 +1,3 @@
-// src/controllers/authController.ts
 import { Request, Response } from 'express';
 import { AuthService } from '../services/authService';
 import { UserModel } from '../models/User';
@@ -7,6 +6,41 @@ import { AuthenticatedRequest } from '../types';
 
 const userModel = new UserModel(pool);
 const authService = new AuthService(userModel);
+
+export const register = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { nomutilisateur, prenomutilisateur, username, password, idjuge, idrole } = req.body;
+
+        if (!nomutilisateur || !prenomutilisateur || !username || !password || !idrole) {
+            res.status(400).json({
+                success: false,
+                message: 'Nom, prénom, nom d\'utilisateur, mot de passe et rôle requis'
+            });
+            return;
+        }
+
+        const result = await authService.register({
+            nomutilisateur,
+            prenomutilisateur,
+            username,
+            password,
+            idjuge: idjuge || null,
+            idrole
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Inscription réussie',
+            data: result
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error instanceof Error ? error.message : 'Erreur lors de l\'inscription'
+        });
+    }
+};
 
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { UserModel, User, UserResponse } from '../models/User';
+import { UserModel, User, UserResponse, CreateUserData } from '../models/User';
 import config from '../config';
 
 export interface LoginData {
@@ -8,7 +8,21 @@ export interface LoginData {
     password: string;
 }
 
+export interface RegisterData {
+    nomutilisateur: string;
+    prenomutilisateur: string;
+    username: string;
+    password: string;
+    idjuge?: number | null;
+    idrole: number;
+}
+
 export interface LoginResponse {
+    user: UserResponse;
+    token: string;
+}
+
+export interface RegisterResponse {
     user: UserResponse;
     token: string;
 }
@@ -18,6 +32,30 @@ export class AuthService {
 
     constructor(userModel: UserModel) {
         this.userModel = userModel;
+    }
+
+    async register(registerData: RegisterData): Promise<RegisterResponse> {
+        const existingUser = await this.userModel.findByUsername(registerData.username);
+        if (existingUser) {
+            throw new Error('Un utilisateur avec ce nom d\'utilisateur existe déjà');
+        }
+
+        const user = await this.userModel.create(registerData);
+
+        const token = jwt.sign(
+            {
+                userId: user.idutilisateur,
+                username: user.username,
+                role: user.idrole
+            },
+            config.jwt.secret,
+            { expiresIn: '24h' }
+        );
+
+        return {
+            user: this.userModel.toResponse(user),
+            token
+        };
     }
 
     async login(loginData: LoginData): Promise<LoginResponse> {
