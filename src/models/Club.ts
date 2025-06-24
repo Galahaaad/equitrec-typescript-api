@@ -6,3 +6,8 @@ export interface Club {
 export interface CreateClubRequest {
     nomclub: string;
 }
+
+export interface CreateClubResponse {
+    idclub: number;
+    nomclub: string;
+}
