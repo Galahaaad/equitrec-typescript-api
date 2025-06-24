@@ -49,3 +49,27 @@ export const authenticateToken = async (
         });
     }
 };
+
+export const requireSuperAdmin = (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): void => {
+    if (!req.user) {
+        res.status(401).json({
+            success: false,
+            message: 'Authentification requise'
+        });
+        return;
+    }
+
+    if (req.user.role !== '1') {
+        res.status(403).json({
+            success: false,
+            message: 'Accès refusé. Droits de Super Administrateur requis.'
+        });
+        return;
+    }
+
+    next();
+};
