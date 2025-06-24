@@ -50,6 +50,31 @@ export const authenticateToken = async (
     }
 };
 
+export const requireJudgeRole = (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): void => {
+    if (!req.user) {
+        res.status(401).json({
+            success: false,
+            message: 'Authentification requise'
+        });
+        return;
+    }
+
+    if (req.user.role !== '3') {
+        res.status(403).json({
+            success: false,
+            message: 'Accès refusé. Droits de Juge requis.'
+        });
+        return;
+    }
+
+    next();
+};
+
+
 export const requireSuperAdmin = (
     req: AuthenticatedRequest,
     res: Response,
