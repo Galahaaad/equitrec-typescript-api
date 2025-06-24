@@ -1,10 +1,12 @@
 import express from 'express';
 import { pool } from '../config/database';
 import authRoutes from './auth';
+import clubRoutes from './clubs';
 
 const router = express.Router();
 
 router.use('/auth', authRoutes);
+router.use('/clubs', clubRoutes);
 
 router.get('/health', async (req, res) => {
     try {
