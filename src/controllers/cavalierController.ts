@@ -1,0 +1,243 @@
+import { Request, Response } from 'express';
+import { CavalierService } from '../services/cavalierService';
+import { AuthenticatedRequest } from '../types';
+
+export class CavalierController {
+    static async getAllCavaliers(req: Request, res: Response): Promise<void> {
+        try {
+            const cavaliers = await CavalierService.getAllCavaliers();
+
+            res.status(200).json({
+                success: true,
+                data: cavaliers,
+                message: 'Cavaliers récupérés avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur dans getAllCavaliers:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la récupération des cavaliers'
+            });
+        }
+    }
+
+    static async getCavalierById(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const cavalierId = parseInt(id);
+
+            if (isNaN(cavalierId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du cavalier invalide'
+                });
+                return;
+            }
+
+            const cavalier = await CavalierService.getCavalierById(cavalierId);
+
+            res.status(200).json({
+                success: true,
+                data: cavalier,
+                message: 'Cavalier récupéré avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans getCavalierById:', error);
+
+            if (error.message === 'Cavalier non trouvé') {
+                res.status(404).json({
+                    success: false,
+                    message: 'Cavalier non trouvé'
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la récupération du cavalier'
+            });
+        }
+    }
+
+    static async getCavaliersByClub(req: Request, res: Response): Promise<void> {
+        try {
+            const { clubId } = req.params;
+            const clubIdNumber = parseInt(clubId);
+
+            if (isNaN(clubIdNumber)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du club invalide'
+                });
+                return;
+            }
+
+            const cavaliers = await CavalierService.getCavaliersByClub(clubIdNumber);
+
+            res.status(200).json({
+                success: true,
+                data: cavaliers,
+                message: 'Cavaliers du club récupérés avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur dans getCavaliersByClub:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la récupération des cavaliers du club'
+            });
+        }
+    }
+
+    static async createCavalier(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const { nomcavalier, prenomcavalier, datenaissance, numerodossard, idclub } = req.body;
+
+            if (!nomcavalier || !prenomcavalier || !datenaissance || !numerodossard || !idclub) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Nom, prénom, date de naissance, numéro de dossard et club sont requis'
+                });
+                return;
+            }
+
+            const newCavalier = await CavalierService.createCavalier({
+                nomcavalier,
+                prenomcavalier,
+                datenaissance,
+                numerodossard,
+                idclub
+            });
+
+            res.status(201).json({
+                success: true,
+                data: newCavalier,
+                message: 'Cavalier créé avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans createCavalier:', error);
+
+            if (error.message === 'Ce numéro de dossard est déjà utilisé' ||
+                error.message === 'Le club spécifié n\'existe pas') {
+                res.status(409).json({
+                    success: false,
+                    message: error.message
+                });
+                return;
+            }
+
+            if (error.message.includes('requis') || error.message.includes('caractères')) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la création du cavalier'
+            });
+        }
+    }
+
+    static async updateCavalier(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const cavalierId = parseInt(id);
+
+            if (isNaN(cavalierId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du cavalier invalide'
+                });
+                return;
+            }
+
+            const { nomcavalier, prenomcavalier, datenaissance, numerodossard, idclub } = req.body;
+
+            const updatedCavalier = await CavalierService.updateCavalier(cavalierId, {
+                nomcavalier,
+                prenomcavalier,
+                datenaissance,
+                numerodossard,
+                idclub
+            });
+
+            res.status(200).json({
+                success: true,
+                data: updatedCavalier,
+                message: 'Cavalier mis à jour avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans updateCavalier:', error);
+
+            if (error.message === 'Cavalier non trouvé') {
+                res.status(404).json({
+                    success: false,
+                    message: 'Cavalier non trouvé'
+                });
+                return;
+            }
+
+            if (error.message === 'Ce numéro de dossard est déjà utilisé' ||
+                error.message === 'Le club spécifié n\'existe pas') {
+                res.status(409).json({
+                    success: false,
+                    message: error.message
+                });
+                return;
+            }
+
+            if (error.message.includes('vide') || error.message.includes('caractères') ||
+                error.message === 'Aucune donnée à mettre à jour') {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la mise à jour du cavalier'
+            });
+        }
+    }
+
+    static async deleteCavalier(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const cavalierId = parseInt(id);
+
+            if (isNaN(cavalierId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du cavalier invalide'
+                });
+                return;
+            }
+
+            await CavalierService.deleteCavalier(cavalierId);
+
+            res.status(200).json({
+                success: true,
+                message: 'Cavalier supprimé avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans deleteCavalier:', error);
+
+            if (error.message === 'Cavalier non trouvé') {
+                res.status(404).json({
+                    success: false,
+                    message: 'Cavalier non trouvé'
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la suppression du cavalier'
+            });
+        }
+    }
+}
