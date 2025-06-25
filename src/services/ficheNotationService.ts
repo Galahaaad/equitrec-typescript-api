@@ -179,25 +179,21 @@ export class FicheNotationService {
         }
     }
 
-    // ATTENTION: Cette méthode supprime en cascade les dépendances (notes, épreuves)
-    // À utiliser uniquement par les SUPER_ADMIN
-    // Modifiable selon les besoins de gestion des dépendances
     static async deleteFicheNotation(id: number): Promise<void> {
+        const client = await pool.connect();
         try {
+            await client.query('BEGIN');
             await this.getFicheNotationById(id);
-
-            // TODO: Gérer la suppression en cascade des dépendances
-            // - Supprimer les enregistrements de la table 'contenir' (notes par catégorie)
-            // - Supprimer les épreuves liées (table 'epreuve')
-            // - Supprimer les relations matériel/caractéristiques si nécessaire
-
-            // Pour l'instant, suppression simple de la fiche
-            // Modifier cette logique selon les besoins
-            const deleteQuery = 'DELETE FROM fichenotation WHERE idfichenotation = $1';
-            await pool.query(deleteQuery, [id]);
+            await client.query('UPDATE epreuve SET idfichenotation = NULL WHERE idfichenotation = $1', [id]);
+            await client.query('DELETE FROM contenir WHERE idfichenotation = $1', [id]);
+            await client.query('DELETE FROM fichenotation WHERE idfichenotation = $1', [id]);
+            await client.query('COMMIT');
         } catch (error) {
+            await client.query('ROLLBACK');
             console.error('Erreur lors de la suppression de la fiche de notation:', error);
             throw error;
+        } finally {
+            client.release();
         }
     }
 }
