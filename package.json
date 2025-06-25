@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "jest --config jest.config.simple.js",
+    "test:watch": "jest --config jest.config.simple.js --watch",
+    "test:coverage": "jest --config jest.config.simple.js --coverage",
+    "test:integration": "jest",
     "test:setup": "psql -U postgres -f tests/database/setup-test-db.sql",
     "dev": "nodemon src/server.ts",
     "build": "tsc",

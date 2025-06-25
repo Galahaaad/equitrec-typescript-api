@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import { FicheNotationController } from '../../src/controllers/ficheNotationController.Ts';
+import { FicheNotationController } from '../../src/controllers/ficheNotationController';
 import { FicheNotationService } from '../../src/services/ficheNotationService';
 
 // Mock du service
