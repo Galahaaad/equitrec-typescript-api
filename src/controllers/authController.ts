@@ -7,6 +7,7 @@ import { AuthenticatedRequest } from '../types';
 const userModel = new UserModel(pool);
 const authService = new AuthService(userModel);
 
+//Test Webhook discord
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         const { nomutilisateur, prenomutilisateur, username, password, idjuge, idrole } = req.body;
