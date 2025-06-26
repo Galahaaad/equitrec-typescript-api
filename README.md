@@ -1,6 +1,6 @@
 # API Equitrec - Documentation
 
-API REST pour la gestion des compétitions équestres avec système de notation et évaluation.
+API REST pour la gestion des compétitions équestres avec système de notation, évaluation et **authentification QR Code sécurisée** pour les juges.
 
 ## 📋 Table des matières
 
@@ -13,6 +13,9 @@ API REST pour la gestion des compétitions équestres avec système de notation 
   - [Cavaliers](#routes-cavaliers)
   - [Fiches de notation](#routes-fiches-de-notation)
   - [Épreuves](#routes-épreuves)
+  - [🆕 Compétitions](#routes-compétitions)
+  - [🆕 Juges](#routes-juges)
+  - [🆕 QR Code Authentication](#routes-qr-code)
   - [Utilitaires](#routes-utilitaires)
 - [Codes d'erreur](#codes-derreur)
 - [Exemples d'utilisation](#exemples-dutilisation)
@@ -40,9 +43,16 @@ Authorization: Bearer <votre_token_jwt>
 ```
 
 ### Rôles disponibles :
-- **SUPER_ADMIN** (idrole: 1) : Accès complet
-- **JUDGE** (idrole: 2) : Gestion des notations et épreuves
+- **SUPER_ADMIN** (idrole: 1) : Accès complet + gestion QR Codes
+- **JUDGE** (idrole: 2) : Gestion des notations et épreuves + authentification QR
 - **USER** (idrole: 3) : Lecture seule
+
+### 🆕 Authentification QR Code :
+Les juges peuvent s'authentifier via QR Code pour les compétitions :
+1. **Admin génère** un QR Code spécifique à la compétition
+2. **QR Code valide** uniquement le jour de la compétition
+3. **Scan & Auth** : authentification instantanée pour 24h
+4. **Sécurité** : JWT avec vérification assignation juge/compétition
 
 ---
 
@@ -102,6 +112,37 @@ Authorization: Bearer <votre_token_jwt>
   titre: string;
   description: string;
   idfichenotation?: number;
+}
+```
+
+### 🆕 Competition
+```typescript
+{
+  idcompetition: number;
+  datecompetition: Date;
+  idutilisateur: number;
+  nomutilisateur?: string;
+  prenomutilisateur?: string;
+}
+```
+
+### 🆕 Juge
+```typescript
+{
+  idjuge: number;
+  nomjuge: string;
+  prenomjuge: string;
+}
+```
+
+### 🆕 QR Code Data
+```typescript
+{
+  qrToken: string;
+  judgeId: number;
+  competitionId: number;
+  competitionDate: string;
+  expiresAt: Date;
 }
 ```
 
@@ -549,6 +590,318 @@ Suppression d'une épreuve
 
 ---
 
+### 🆕 Routes Compétitions
+
+#### GET `/competitions`
+Liste toutes les compétitions
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "idcompetition": 1,
+      "datecompetition": "2024-02-15T00:00:00.000Z",
+      "idutilisateur": 1,
+      "nomutilisateur": "Admin",
+      "prenomutilisateur": "System"
+    }
+  ],
+  "message": "Compétitions récupérées avec succès"
+}
+```
+
+#### GET `/competitions/:id`
+Récupère une compétition par ID
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+#### GET `/competitions/:id/judges`
+Récupère une compétition avec ses juges assignés
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idcompetition": 1,
+    "datecompetition": "2024-02-15T00:00:00.000Z",
+    "juges": [
+      {
+        "idjuge": 1,
+        "nomjuge": "Dubois",
+        "prenomjuge": "Marie",
+        "hasUserAccount": true,
+        "idutilisateur": 5
+      }
+    ]
+  }
+}
+```
+
+#### POST `/competitions/create`
+Création d'une nouvelle compétition
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Body :**
+```json
+{
+  "datecompetition": "2024-03-15",
+  "idutilisateur": 1
+}
+```
+
+#### PUT `/competitions/:id`
+Mise à jour d'une compétition
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+#### DELETE `/competitions/:id`
+Suppression d'une compétition
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans les tables `juger` et `participer`.
+
+#### POST `/competitions/:id/assign-judge`
+Assigner un juge à une compétition
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Body :**
+```json
+{
+  "judgeId": 1
+}
+```
+
+#### DELETE `/competitions/:competitionId/judges/:judgeId`
+Retirer un juge d'une compétition
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`
+
+---
+
+### 🆕 Routes Juges
+
+#### GET `/judges`
+Liste tous les juges
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "idjuge": 1,
+      "nomjuge": "Dubois",
+      "prenomjuge": "Marie"
+    }
+  ],
+  "message": "Juges récupérés avec succès"
+}
+```
+
+#### GET `/judges/:id`
+Récupère un juge par ID
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+#### GET `/judges/:id/competitions`
+Récupère un juge avec ses compétitions assignées
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+#### POST `/judges/create`
+Création d'un nouveau juge
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Body :**
+```json
+{
+  "nomjuge": "Martin",
+  "prenomjuge": "Pierre"
+}
+```
+
+#### PUT `/judges/:id`
+Mise à jour d'un juge
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+#### DELETE `/judges/:id`
+Suppression d'un juge
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+---
+
+### 🆕 Routes QR Code Authentication
+
+#### POST `/qr/generate`
+Génération d'un QR Code pour un juge spécifique
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Body :**
+```json
+{
+  "competitionId": 1,
+  "judgeId": 1
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "qrToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "qrData": "{\"token\":\"...\",\"competition\":1,\"judge\":1,\"date\":\"2024-02-15\"}",
+    "judgeInfo": {
+      "idjuge": 1,
+      "nomjuge": "Dubois",
+      "prenomjuge": "Marie"
+    },
+    "competitionInfo": {
+      "idcompetition": 1,
+      "datecompetition": "2024-02-15T00:00:00.000Z"
+    },
+    "expiresAt": "2024-02-15T23:59:59.999Z"
+  },
+  "message": "QR Code généré avec succès"
+}
+```
+
+#### POST `/qr/generate/bulk/:competitionId`
+Génération en masse des QR Codes pour une compétition
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `competitionId` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "competitionId": 1,
+    "qrCodes": [
+      {
+        "success": true,
+        "data": { /* QR Code data for each judge */ }
+      }
+    ],
+    "count": 3
+  },
+  "message": "3 QR Code(s) généré(s) avec succès"
+}
+```
+
+#### POST `/qr/validate`
+Validation d'un QR Code par un juge
+
+**Pré-requis :** Aucun (route publique)  
+**Body :**
+```json
+{
+  "qrToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "permanentToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "idutilisateur": 5,
+      "nomutilisateur": "Dubois",
+      "prenomutilisateur": "Marie",
+      "username": "marie.dubois",
+      "idjuge": 1,
+      "idrole": 2
+    },
+    "competition": {
+      "idcompetition": 1,
+      "datecompetition": "2024-02-15T00:00:00.000Z"
+    },
+    "message": "Authentification réussie pour la compétition du 2024-02-15"
+  }
+}
+```
+
+**Codes d'erreur spécifiques :**
+- `401` : QR Code expiré ou invalide
+- `403` : QR Code utilisable uniquement le jour de la compétition
+- `400` : Juge non assigné à cette compétition
+
+#### GET `/qr/status/:competitionId`
+Statut des QR Codes pour une compétition
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `competitionId` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "competition": {
+      "idcompetition": 1,
+      "datecompetition": "2024-02-15T00:00:00.000Z",
+      "isToday": false
+    },
+    "judges": [
+      {
+        "idjuge": 1,
+        "nomjuge": "Dubois",
+        "prenomjuge": "Marie",
+        "canGenerateQR": true,
+        "qrGenerationStatus": "ready"
+      }
+    ],
+    "summary": {
+      "totalJudges": 3,
+      "eligibleForQR": 2,
+      "canGenerateQR": true
+    }
+  }
+}
+```
+
+---
+
 ### Routes Utilitaires
 
 #### GET `/health`
@@ -673,6 +1026,51 @@ curl -X POST http://localhost:3000/api/v1/epreuves/create \
   }'
 ```
 
+### 🆕 Workflow complet QR Code pour une compétition
+```bash
+# 1. Créer une compétition (SUPER_ADMIN requis)
+curl -X POST http://localhost:3000/api/v1/competitions/create \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "datecompetition": "2024-03-15",
+    "idutilisateur": 1
+  }'
+
+# 2. Créer et assigner des juges (SUPER_ADMIN requis)
+curl -X POST http://localhost:3000/api/v1/judges/create \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nomjuge": "Dubois",
+    "prenomjuge": "Marie"
+  }'
+
+curl -X POST http://localhost:3000/api/v1/competitions/1/assign-judge \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"judgeId": 1}'
+
+# 3. Vérifier le statut QR de la compétition
+curl -X GET http://localhost:3000/api/v1/qr/status/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# 4. Générer tous les QR Codes pour la compétition
+curl -X POST http://localhost:3000/api/v1/qr/generate/bulk/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# 5. Le jour J : juge valide son QR Code (route publique)
+curl -X POST http://localhost:3000/api/v1/qr/validate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "qrToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }'
+
+# 6. Juge utilise le token permanent pour accéder aux fonctionnalités
+curl -X GET http://localhost:3000/api/v1/fiches-notation \
+  -H "Authorization: Bearer PERMANENT_TOKEN_FROM_QR_VALIDATION"
+```
+
 ---
 
 ## 🔧 Configuration
@@ -694,7 +1092,12 @@ PORT=3000
 3. **Validation** : Toutes les entrées sont validées côté serveur
 4. **Logs** : Les erreurs sont loggées pour faciliter le debugging
 5. **Tests** : Suite de tests unitaires disponible avec `npm test`
+6. **🆕 QR Code** : Authentification sécurisée avec JWT competition-based
+7. **🆕 Competition Management** : Gestion complète des compétitions et assignations
+8. **🆕 Judge Management** : CRUD complet pour les juges avec relations
+9. **🆕 Security** : QR Codes valides uniquement le jour de compétition
+10. **🆕 Scalability** : Génération en masse et stateless architecture
 
 ---
 
-*Documentation générée automatiquement - Version 1.0.0*
+*Documentation générée automatiquement - Version 2.0.0* 🆕
