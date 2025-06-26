@@ -81,7 +81,7 @@ export class QRCodeService {
             // Vérifier que le juge a un compte utilisateur avec le rôle JUDGE
             const userQuery = `
                 SELECT u.* FROM utilisateur u 
-                WHERE u.idjuge = $1 AND u.idrole = 2
+                WHERE u.idjuge = $1 AND u.idrole = 3
             `;
             const userResult = await pool.query(userQuery, [request.judgeId]);
             
@@ -106,7 +106,7 @@ export class QRCodeService {
             };
 
             // Générer le token JWT
-            const qrToken = jwt.sign(payload, config.jwtSecret);
+            const qrToken = jwt.sign(payload, config.jwt.secret);
 
             // Données pour le QR Code (format JSON)
             const qrData = JSON.stringify({
@@ -143,7 +143,7 @@ export class QRCodeService {
     static async validateQRCode(request: ValidateQRRequest): Promise<ValidateQRResponse> {
         try {
             // Vérifier et décoder le token JWT
-            const decoded = jwt.verify(request.qrToken, config.jwtSecret) as QRTokenPayload;
+            const decoded = jwt.verify(request.qrToken, config.jwt.secret) as QRTokenPayload;
 
             // Vérifications de sécurité
             if (!decoded.qrAuth || decoded.type !== 'competition_qr') {
@@ -172,7 +172,7 @@ export class QRCodeService {
                 SELECT u.idutilisateur, u.nomutilisateur, u.prenomutilisateur, 
                        u.username, u.idjuge, u.idrole 
                 FROM utilisateur u 
-                WHERE u.idjuge = $1 AND u.idrole = 2
+                WHERE u.idjuge = $1 AND u.idrole = 3
             `;
             const userResult = await pool.query(userQuery, [decoded.judgeId]);
             
@@ -192,9 +192,11 @@ export class QRCodeService {
                 iat: Math.floor(Date.now() / 1000)
             };
 
-            const permanentToken = jwt.sign(permanentTokenPayload, config.jwtSecret, {
-                expiresIn: '24h' // Token de session valide 24h
-            });
+            const permanentToken = jwt.sign(
+                permanentTokenPayload, 
+                config.jwt.secret as string, 
+                { expiresIn: config.jwt.expiresIn }
+            );
 
             return {
                 success: true,
