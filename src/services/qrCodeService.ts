@@ -192,11 +192,7 @@ export class QRCodeService {
                 iat: Math.floor(Date.now() / 1000)
             };
 
-            const permanentToken = jwt.sign(
-                permanentTokenPayload, 
-                config.jwt.secret as string, 
-                { expiresIn: config.jwt.expiresIn as string }
-            );
+            const permanentToken = jwt.sign(permanentTokenPayload, config.jwt.secret);
 
             return {
                 success: true,
