@@ -4,6 +4,7 @@ import authRoutes from './auth';
 import clubRoutes from './clubs';
 import cavalierRoutes from './cavaliers';
 import fichesNotationController from './fichesNotation';
+import epreuveRoutes from './epreuves';
 
 const router = express.Router();
 
@@ -11,6 +12,7 @@ router.use('/auth', authRoutes);
 router.use('/clubs', clubRoutes);
 router.use('/cavaliers', cavalierRoutes);
 router.use('/fiches-notation', fichesNotationController);
+router.use('/epreuves', epreuveRoutes);
 
 router.get('/health', async (req, res) => {
     try {
