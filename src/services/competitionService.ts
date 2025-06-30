@@ -6,7 +6,7 @@ export class CompetitionService {
     static async getAllCompetitions(): Promise<Competition[]> {
         try {
             const query = `
-                SELECT c.idcompetition, c.datecompetition, c.idutilisateur,
+                SELECT c.idcompetition, c.nomcompetition, c.datecompetition, c.idutilisateur,
                        u.nomutilisateur, u.prenomutilisateur
                 FROM competition c
                 LEFT JOIN utilisateur u ON c.idutilisateur = u.idutilisateur
@@ -23,7 +23,7 @@ export class CompetitionService {
     static async getCompetitionById(id: number): Promise<Competition> {
         try {
             const query = `
-                SELECT c.idcompetition, c.datecompetition, c.idutilisateur,
+                SELECT c.idcompetition, c.nomcompetition, c.datecompetition, c.idutilisateur,
                        u.nomutilisateur, u.prenomutilisateur
                 FROM competition c
                 LEFT JOIN utilisateur u ON c.idutilisateur = u.idutilisateur
@@ -79,7 +79,7 @@ export class CompetitionService {
     static async getUpcomingCompetitions(): Promise<Competition[]> {
         try {
             const query = `
-                SELECT c.idcompetition, c.datecompetition, c.idutilisateur,
+                SELECT c.idcompetition, c.nomcompetition, c.datecompetition, c.idutilisateur,
                        u.nomutilisateur, u.prenomutilisateur
                 FROM competition c
                 LEFT JOIN utilisateur u ON c.idutilisateur = u.idutilisateur
@@ -97,7 +97,7 @@ export class CompetitionService {
     static async getCompetitionsByDate(date: string): Promise<Competition[]> {
         try {
             const query = `
-                SELECT c.idcompetition, c.datecompetition, c.idutilisateur,
+                SELECT c.idcompetition, c.nomcompetition, c.datecompetition, c.idutilisateur,
                        u.nomutilisateur, u.prenomutilisateur
                 FROM competition c
                 LEFT JOIN utilisateur u ON c.idutilisateur = u.idutilisateur
@@ -114,6 +114,14 @@ export class CompetitionService {
 
     static async createCompetition(competitionData: CreateCompetitionRequest): Promise<CreateCompetitionResponse> {
         try {
+            if (!competitionData.nomcompetition) {
+                throw new Error('Le nom de compétition est requis');
+            }
+
+            if (competitionData.nomcompetition.length > 100) {
+                throw new Error('Le nom de compétition ne peut pas dépasser 100 caractères');
+            }
+
             if (!competitionData.datecompetition) {
                 throw new Error('La date de compétition est requise');
             }
@@ -135,11 +143,12 @@ export class CompetitionService {
             }
 
             const insertQuery = `
-                INSERT INTO competition (datecompetition, idutilisateur) 
-                VALUES ($1, $2) 
-                RETURNING idcompetition, datecompetition, idutilisateur
+                INSERT INTO competition (nomcompetition, datecompetition, idutilisateur) 
+                VALUES ($1, $2, $3) 
+                RETURNING idcompetition, nomcompetition, datecompetition, idutilisateur
             `;
             const insertResult = await pool.query(insertQuery, [
+                competitionData.nomcompetition,
                 competitionDate,
                 competitionData.idutilisateur
             ]);
@@ -168,6 +177,15 @@ export class CompetitionService {
             const values: any[] = [];
             let paramIndex = 1;
 
+            if (competitionData.nomcompetition !== undefined) {
+                if (competitionData.nomcompetition.length > 100) {
+                    throw new Error('Le nom de compétition ne peut pas dépasser 100 caractères');
+                }
+                updateFields.push(`nomcompetition = $${paramIndex}`);
+                values.push(competitionData.nomcompetition);
+                paramIndex++;
+            }
+
             if (competitionData.datecompetition !== undefined) {
                 const competitionDate = new Date(competitionData.datecompetition);
                 if (isNaN(competitionDate.getTime())) {
@@ -193,7 +211,7 @@ export class CompetitionService {
                 UPDATE competition 
                 SET ${updateFields.join(', ')} 
                 WHERE idcompetition = $${paramIndex}
-                RETURNING idcompetition, datecompetition, idutilisateur
+                RETURNING idcompetition, nomcompetition, datecompetition, idutilisateur
             `;
 
             const updateResult = await pool.query(updateQuery, values);

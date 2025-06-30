@@ -169,7 +169,7 @@ export class QRCodeService {
 
             // Récupérer les informations complètes de l'utilisateur
             const userQuery = `
-                SELECT u.idutilisateur, u.nomutilisateur, u.prenomutilisateur, 
+                SELECT u.idutilisateur, u.nomutilisateur, u.prenomutilisateur, u.email,
                        u.username, u.idjuge, u.idrole 
                 FROM utilisateur u 
                 WHERE u.idjuge = $1 AND u.idrole = 3

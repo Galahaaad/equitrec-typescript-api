@@ -43,7 +43,7 @@ export class JugeService {
             const juge = await this.getJugeById(id);
             
             const competitionsQuery = `
-                SELECT c.idcompetition, c.datecompetition,
+                SELECT c.idcompetition, c.nomcompetition, c.datecompetition,
                        u.nomutilisateur, u.prenomutilisateur
                 FROM juger jg
                 JOIN competition c ON jg.idcompetition = c.idcompetition

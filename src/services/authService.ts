@@ -11,6 +11,7 @@ export interface LoginData {
 export interface RegisterData {
     nomutilisateur: string;
     prenomutilisateur: string;
+    email: string;
     username: string;
     password: string;
     idjuge?: number | null;
