@@ -180,6 +180,7 @@ export class EpreuveService {
             await client.query('BEGIN');
             await this.getEpreuveById(id);
             await client.query('DELETE FROM detenir WHERE idepreuve = $1', [id]);
+            await client.query('DELETE FROM posseder WHERE idepreuve = $1', [id]);
             await client.query('DELETE FROM epreuve WHERE idepreuve = $1', [id]);
             await client.query('COMMIT');
         } catch (error) {

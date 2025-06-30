@@ -8,6 +8,7 @@ import epreuveRoutes from './epreuves';
 import competitionRoutes from './competitions';
 import jugeRoutes from './judges';
 import qrRoutes from './qr';
+import caracteristiqueRoutes from './caracteristiques';
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ router.use('/epreuves', epreuveRoutes);
 router.use('/competitions', competitionRoutes);
 router.use('/judges', jugeRoutes);
 router.use('/qr', qrRoutes);
+router.use('/caracteristiques', caracteristiqueRoutes);
 
 router.get('/health', async (req, res) => {
     try {
