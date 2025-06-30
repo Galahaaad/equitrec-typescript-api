@@ -15,6 +15,7 @@ API REST pour la gestion des compétitions équestres avec système de notation,
   - [Épreuves](#routes-épreuves)
   - [Compétitions](#routes-compétitions)
   - [Juges](#routes-juges)
+  - [Caractéristiques](#routes-caractéristiques)
   - [QR Code Authentication](#routes-qr-code)
   - [Utilitaires](#routes-utilitaires)
 - [Codes d'erreur](#codes-derreur)
@@ -654,7 +655,171 @@ Suppression d'une épreuve
 **Headers :** `Authorization: Bearer <token>`  
 **Paramètres :** `id` (number)
 
-**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans la table `detenir`.
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans les tables `detenir` et `posseder`.
+
+---
+
+### Routes Caractéristiques
+
+#### GET `/caracteristiques`
+Liste toutes les caractéristiques
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "idcaracteristique": 1,
+      "libelle": "Obstacle fixe",
+      "description": "Obstacle qui ne peut pas être déplacé pendant l'épreuve"
+    }
+  ],
+  "message": "Caractéristiques récupérées avec succès"
+}
+```
+
+#### GET `/caracteristiques/:id`
+Récupère une caractéristique par ID
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idcaracteristique": 1,
+    "libelle": "Obstacle fixe",
+    "description": "Obstacle qui ne peut pas être déplacé pendant l'épreuve"
+  },
+  "message": "Caractéristique récupérée avec succès"
+}
+```
+
+#### GET `/caracteristiques/epreuve/:epreuveId`
+Récupère les caractéristiques d'une épreuve
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `epreuveId` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "idcaracteristique": 1,
+      "libelle": "Obstacle fixe",
+      "description": "Obstacle qui ne peut pas être déplacé pendant l'épreuve"
+    }
+  ],
+  "message": "Caractéristiques de l'épreuve récupérées avec succès"
+}
+```
+
+#### POST `/caracteristiques/create`
+Création d'une nouvelle caractéristique
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Body :**
+```json
+{
+  "libelle": "Obstacle mobile",
+  "description": "Obstacle qui peut être déplacé pendant l'épreuve"
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idcaracteristique": 2,
+    "libelle": "Obstacle mobile",
+    "description": "Obstacle qui peut être déplacé pendant l'épreuve"
+  },
+  "message": "Caractéristique créée avec succès"
+}
+```
+
+**Validation :**
+- `libelle` : requis, max 200 caractères
+- `description` : requise, max 500 caractères
+
+#### PUT `/caracteristiques/:id`
+Mise à jour d'une caractéristique
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)  
+**Body :** (tous les champs optionnels)
+```json
+{
+  "libelle": "Obstacle modifié",
+  "description": "Description mise à jour"
+}
+```
+
+#### DELETE `/caracteristiques/:id`
+Suppression d'une caractéristique
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Caractéristique supprimée avec succès"
+}
+```
+
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans la table `posseder`.
+
+#### POST `/caracteristiques/epreuve/:epreuveId/assign`
+Assigner une caractéristique à une épreuve
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN ou JUGE  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `epreuveId` (number)  
+**Body :**
+```json
+{
+  "caracteristiqueId": 1
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Caractéristique assignée à l'épreuve avec succès"
+}
+```
+
+#### DELETE `/caracteristiques/epreuve/:epreuveId/caracteristique/:caracteristiqueId`
+Retirer une caractéristique d'une épreuve
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN ou JUGE  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `epreuveId` (number), `caracteristiqueId` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Caractéristique retirée de l'épreuve avec succès"
+}
+```
 
 ---
 
@@ -1149,6 +1314,32 @@ curl -X GET http://localhost:3000/api/v1/fiches-notation \
   -H "Authorization: Bearer PERMANENT_TOKEN_FROM_QR_VALIDATION"
 ```
 
+### Gestion des caractéristiques d'épreuves
+```bash
+# 1. Créer une caractéristique (SUPER_ADMIN requis)
+curl -X POST http://localhost:3000/api/v1/caracteristiques/create \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "libelle": "Obstacle fixe",
+    "description": "Obstacle qui ne peut pas être déplacé pendant l'\''épreuve"
+  }'
+
+# 2. Assigner la caractéristique à une épreuve (SUPER_ADMIN ou JUGE requis)
+curl -X POST http://localhost:3000/api/v1/caracteristiques/epreuve/1/assign \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"caracteristiqueId": 1}'
+
+# 3. Récupérer les caractéristiques d'une épreuve
+curl -X GET http://localhost:3000/api/v1/caracteristiques/epreuve/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# 4. Retirer une caractéristique d'une épreuve (SUPER_ADMIN ou JUGE requis)
+curl -X DELETE http://localhost:3000/api/v1/caracteristiques/epreuve/1/caracteristique/1 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
 ---
 
 ## 🔧 Configuration
@@ -1176,6 +1367,7 @@ PORT=3000
 9. **Security** : QR Codes valides uniquement le jour de compétition
 10. **Scalability** : Génération en masse et stateless architecture
 11. **Schema** : Épreuves liées aux juges, fiches de notation liées aux épreuves
+12. **Caracteristiques** : Gestion des caractéristiques d'épreuves avec table de liaison `posseder`
 
 ---
 
