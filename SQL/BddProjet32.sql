@@ -40,6 +40,7 @@ Create Table Utilisateur(
                             idUtilisateur serial,
                             nomUtilisateur varchar(50),
                             prenomUtilisateur varchar(50),
+                            email varchar(200),
                             username varchar(100),
                             password varchar(255),
                             idJuge int,
@@ -51,6 +52,7 @@ Create Table Utilisateur(
 
 Create Table Competition(
                             idCompetition serial,
+                            nomCompetition varchar(100),
                             dateCompetition timestamp,
                             idUtilisateur int,
                             Constraint Competition_PK Primary Key (idCompetition),

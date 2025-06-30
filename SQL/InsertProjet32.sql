@@ -20,25 +20,25 @@ INSERT INTO Juge (idJuge, nomJuge, prenomJuge, codePin) VALUES
                                                             (10, 'Machin', 'Truc', NULL)
 ;
 
-INSERT INTO Utilisateur (idUtilisateur, nomUtilisateur, prenomUtilisateur, username, password, idJuge, idRole) VALUES
-                                                                                                                   (1, 'Yazbek', 'Rachel', 'ryazbek', 'pass123', 1, 3),
-                                                                                                                   (2, 'Nidam', 'Mamoune', 'mamounette', '123456789', 2, 3),
-                                                                                                                   (3, 'Dupont', 'Jean', 'jdupont', 'secret', 3, 1),
-                                                                                                                   (4, 'Durand', 'Lucie', 'ldurand', 'luciePwd', 4, 3),
-                                                                                                                   (5, 'Martin', 'Paul', 'pmartin', 'pm1234', 5, 3),
-                                                                                                                   (6, 'Moreau', 'Sophie', 'smoreau', 'sm456', 6, 3),
-                                                                                                                   (7, 'Goudet', 'Magali', 'mgoudet', 'test123', 7, 2),
-                                                                                                                   (8, 'Berns', 'Benjamin', 'bberns', '12345689787', 8, 2),
-                                                                                                                   (9, 'Kebriti', 'Eddy', 'ekebriti', 'abcd123', 9, 2),
-                                                                                                                   (10, 'Machin', 'Truc', 'tmachin', 'ahahahahahahahaha', 10, 2)
+INSERT INTO Utilisateur (idUtilisateur, nomUtilisateur, prenomUtilisateur, email, username, password, idJuge, idRole) VALUES
+                                                                                                                          (1, 'Yazbek', 'Rachel', 'racyaz@gmail.com', 'ryazbek', 'pass123', 1, 3),
+                                                                                                                          (2, 'Nidam', 'Mamoune', 'mamnid@gmail.com', 'mamounette', '123456789', 2, 3),
+                                                                                                                          (3, 'Dupont', 'Jean', 'jeadup@gmail.com', 'jdupont', 'secret', 3, 1),
+                                                                                                                          (4, 'Durand', 'Lucie', 'lucdur@gmail.com', 'ldurand', 'luciePwd', 4, 3),
+                                                                                                                          (5, 'Martin', 'Paul', 'paumar@gmail.com', 'pmartin', 'pm1234', 5, 3),
+                                                                                                                          (6, 'Moreau', 'Sophie', 'sopmor@gmail.com', 'smoreau', 'sm456', 6, 3),
+                                                                                                                          (7, 'Goudet', 'Magali', 'maggou@gmail.com', 'mgoudet', 'test123', 7, 2),
+                                                                                                                          (8, 'Berns', 'Benjamin', 'benber@gmail.com', 'bberns', '12345689787', 8, 2),
+                                                                                                                          (9, 'Kebriti', 'Eddy', 'eddkeb@gmail.com', 'ekebriti', 'abcd123', 9, 2),
+                                                                                                                          (10, 'Machin', 'Truc', 'trumac@gmail.com', 'tmachin', 'ahahahahahahahaha', 10, 2)
 ;
 
 
-INSERT INTO Competition (dateCompetition, idUtilisateur) VALUES
-                                                             ('2025-06-01 10:00:00', 7),
-                                                             ('2025-08-02 14:30:00', 8),
-                                                             ('2025-06-05 09:00:00', 9),
-                                                             ('2025-06-10 16:00:00', 10)
+INSERT INTO Competition (nomCompetition, dateCompetition, idUtilisateur) VALUES
+                                                                             ('Coupe de France' ,'2025-06-01 10:00:00', 7),
+                                                                             ('Coupe de la Lozère' ,'2025-08-02 14:30:00', 8),
+                                                                             ('Coupe de Larzac' ,'2025-06-05 09:00:00', 9),
+                                                                             ('Coupe de TrecInvitational' ,'2025-06-10 16:00:00', 10)
 ;
 
 INSERT INTO Juger (idJuge, idCompetition) VALUES
