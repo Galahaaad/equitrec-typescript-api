@@ -1,0 +1,21 @@
+FROM node:18-alpine
+
+# Installer curl pour healthcheck
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+# Copier package.json et package-lock.json
+COPY package*.json ./
+
+# Installer toutes les dépendances (dev incluses)
+RUN npm install
+
+# Copier le code source
+COPY . .
+
+# Exposer le port
+EXPOSE 3000
+
+# Commande de développement avec hot reload
+CMD ["npm", "run", "dev"]

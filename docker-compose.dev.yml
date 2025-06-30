@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL pour développement
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: equitrec-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: equitrec_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5433:5432"  # Port différent pour éviter conflits
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./SQL/BddProjet32.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./SQL/InsertProjet32.sql:/docker-entrypoint-initdb.d/02-data.sql
+    networks:
+      - equitrec-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev_user -d equitrec_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Service pour hasher les mots de passe au démarrage
+  hash-passwords:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: equitrec-hash-passwords
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres-dev
+      DB_PORT: 5432
+      DB_NAME: equitrec_dev
+      DB_USER: dev_user
+      DB_PASSWORD: dev_password
+      DB_SSL: false
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+    networks:
+      - equitrec-dev-network
+    command: npm run hash-passwords
+    restart: "no"
+
+  # API en mode développement avec hot reload
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: equitrec-api-dev
+    restart: unless-stopped
+    ports:
+      - "3001:3000"  # Port différent pour éviter conflits
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: postgres-dev
+      DB_PORT: 5432
+      DB_NAME: equitrec_dev
+      DB_USER: dev_user
+      DB_PASSWORD: dev_password
+      DB_SSL: false
+      JWT_SECRET: dev-jwt-secret-not-for-production
+    volumes:
+      - .:/app
+      - /app/node_modules  # Volume anonyme pour node_modules
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+      hash-passwords:
+        condition: service_completed_successfully
+    networks:
+      - equitrec-dev-network
+    command: npm run dev
+
+volumes:
+  postgres_dev_data:
+    driver: local
+
+networks:
+  equitrec-dev-network:
+    driver: bridge
