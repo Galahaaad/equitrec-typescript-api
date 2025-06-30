@@ -9,7 +9,7 @@ export const setupMiddlewares = (app: express.Application): void => {
     app.use(cors({
         origin: config.nodeEnv === 'production'
             ? ['https://yourdomain.com'] // prévision : prod
-            : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:4200/', 'http://localhost:8081','http://10.197.102.242:3001', 'http://10.197.102.242:8081/'],
+            : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:4200', 'http://localhost:8081','http://10.197.102.242:3001', 'http://10.197.102.242:8081'],
         credentials: true,
     }));
 
