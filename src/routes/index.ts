@@ -5,6 +5,8 @@ import clubRoutes from './clubs';
 import cavalierRoutes from './cavaliers';
 import fichesNotationController from './fichesNotation';
 import epreuveRoutes from './epreuves';
+import competitionRoutes from './competitions';
+import jugeRoutes from './judges';
 import qrRoutes from './qr';
 
 const router = express.Router();
@@ -14,6 +16,8 @@ router.use('/clubs', clubRoutes);
 router.use('/cavaliers', cavalierRoutes);
 router.use('/fiches-notation', fichesNotationController);
 router.use('/epreuves', epreuveRoutes);
+router.use('/competitions', competitionRoutes);
+router.use('/judges', jugeRoutes);
 router.use('/qr', qrRoutes);
 
 router.get('/health', async (req, res) => {
