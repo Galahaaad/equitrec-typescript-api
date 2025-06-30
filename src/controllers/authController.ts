@@ -29,7 +29,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const result = await authService.register({
+        const registerData = {
             nomutilisateur,
             prenomutilisateur,
             email,
@@ -37,7 +37,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             password,
             idjuge: idjuge || null,
             idrole
-        });
+        };
+
+        const result = await authService.register(registerData);
 
         res.status(201).json({
             success: true,
