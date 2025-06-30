@@ -5,6 +5,7 @@ export interface User {
     idutilisateur: number;
     nomutilisateur: string;
     prenomutilisateur: string;
+    email: string;
     username: string;
     password: string;
     idjuge: number | null;
@@ -15,6 +16,7 @@ export interface UserResponse {
     idutilisateur: number;
     nomutilisateur: string;
     prenomutilisateur: string;
+    email: string;
     username: string;
     idjuge: number | null;
     idrole: number;
@@ -23,6 +25,7 @@ export interface UserResponse {
 export interface CreateUserData {
     nomutilisateur: string;
     prenomutilisateur: string;
+    email: string;
     username: string;
     password: string;
     idjuge?: number | null;
@@ -39,7 +42,7 @@ export class UserModel {
     async findByUsername(username: string): Promise<User | null> {
         const query = `
       SELECT idutilisateur, nomutilisateur, prenomutilisateur, 
-             username, password, idjuge, idrole 
+             email, username, password, idjuge, idrole 
       FROM utilisateur 
       WHERE username = $1
     `;
@@ -51,7 +54,7 @@ export class UserModel {
     async findById(id: number): Promise<User | null> {
         const query = `
       SELECT idutilisateur, nomutilisateur, prenomutilisateur, 
-             username, password, idjuge, idrole 
+             email, username, password, idjuge, idrole 
       FROM utilisateur 
       WHERE idutilisateur = $1
     `;
@@ -64,14 +67,15 @@ export class UserModel {
         const hashedPassword = await bcrypt.hash(userData.password, 10);
 
         const query = `
-            INSERT INTO utilisateur (nomutilisateur, prenomutilisateur, username, password, idjuge, idrole)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING idutilisateur, nomutilisateur, prenomutilisateur, username, password, idjuge, idrole
+            INSERT INTO utilisateur (nomutilisateur, prenomutilisateur, email, username, password, idjuge, idrole)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING idutilisateur, nomutilisateur, prenomutilisateur, email, username, password, idjuge, idrole
         `;
 
         const values = [
             userData.nomutilisateur,
             userData.prenomutilisateur,
+            userData.email,
             userData.username,
             hashedPassword,
             userData.idjuge || null,

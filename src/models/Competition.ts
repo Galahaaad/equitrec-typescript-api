@@ -1,5 +1,6 @@
 export interface Competition {
     idcompetition: number;
+    nomcompetition?: string;
     datecompetition: Date;
     idutilisateur: number;
     nomutilisateur?: string;
@@ -7,23 +8,27 @@ export interface Competition {
 }
 
 export interface CreateCompetitionRequest {
+    nomcompetition: string;
     datecompetition: string; // ISO date string
     idutilisateur: number;
 }
 
 export interface UpdateCompetitionRequest {
+    nomcompetition?: string;
     datecompetition?: string;
     idutilisateur?: number;
 }
 
 export interface CreateCompetitionResponse {
     idcompetition: number;
+    nomcompetition: string;
     datecompetition: Date;
     idutilisateur: number;
 }
 
 export interface CompetitionWithJudges {
     idcompetition: number;
+    nomcompetition?: string;
     datecompetition: Date;
     idutilisateur: number;
     nomutilisateur?: string;
