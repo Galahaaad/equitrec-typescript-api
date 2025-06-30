@@ -13,9 +13,9 @@ API REST pour la gestion des compétitions équestres avec système de notation,
   - [Cavaliers](#routes-cavaliers)
   - [Fiches de notation](#routes-fiches-de-notation)
   - [Épreuves](#routes-épreuves)
-  - [🆕 Compétitions](#routes-compétitions)
-  - [🆕 Juges](#routes-juges)
-  - [🆕 QR Code Authentication](#routes-qr-code)
+  - [Compétitions](#routes-compétitions)
+  - [Juges](#routes-juges)
+  - [QR Code Authentication](#routes-qr-code)
   - [Utilitaires](#routes-utilitaires)
 - [Codes d'erreur](#codes-derreur)
 - [Exemples d'utilisation](#exemples-dutilisation)
@@ -47,7 +47,7 @@ Authorization: Bearer <votre_token_jwt>
 - **GÉRANT** (idrole: 2) : Gestion intermédiaire
 - **JUGE** (idrole: 3) : Gestion des notations et épreuves + authentification QR
 
-### 🆕 Authentification QR Code :
+### Authentification QR Code :
 Les juges peuvent s'authentifier via QR Code pour les compétitions :
 1. **Admin génère** un QR Code spécifique à la compétition
 2. **QR Code valide** uniquement le jour de la compétition
@@ -64,6 +64,7 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
   idutilisateur: number;
   nomutilisateur: string;
   prenomutilisateur: string;
+  email: string;
   username: string;
   idjuge?: number | null;
   idrole: number;
@@ -119,10 +120,11 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
 }
 ```
 
-### 🆕 Competition
+### Competition
 ```typescript
 {
   idcompetition: number;
+  nomcompetition: string;
   datecompetition: Date;
   idutilisateur: number;
   nomutilisateur?: string;
@@ -130,7 +132,7 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
 }
 ```
 
-### 🆕 Juge
+### Juge
 ```typescript
 {
   idjuge: number;
@@ -140,7 +142,7 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
 }
 ```
 
-### 🆕 QR Code Data
+### QR Code Data
 ```typescript
 {
   qrToken: string;
@@ -151,7 +153,7 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
 }
 ```
 
-### 🆕 Niveau
+### Niveau
 ```typescript
 {
   idniveau: number;
@@ -160,7 +162,7 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
 }
 ```
 
-### 🆕 Critere
+### Critere
 ```typescript
 {
   idcritere: number;
@@ -171,7 +173,7 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
 }
 ```
 
-### 🆕 Categorie
+### Categorie
 ```typescript
 {
   idcategorie: number;
@@ -180,7 +182,7 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
 }
 ```
 
-### 🆕 Materiel
+### Materiel
 ```typescript
 {
   idmateriel: number;
@@ -188,7 +190,7 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
 }
 ```
 
-### 🆕 Caracteristique
+### Caracteristique
 ```typescript
 {
   idcaracteristique: number;
@@ -212,6 +214,7 @@ Inscription d'un nouvel utilisateur
 {
   "nomutilisateur": "Dupont",
   "prenomutilisateur": "Jean",
+  "email": "jean.dupont@example.com",
   "username": "jean.dupont",
   "password": "motdepasse123",
   "idjuge": 1,
@@ -655,7 +658,7 @@ Suppression d'une épreuve
 
 ---
 
-### 🆕 Routes Compétitions
+### Routes Compétitions
 
 #### GET `/competitions`
 Liste toutes les compétitions
@@ -670,6 +673,7 @@ Liste toutes les compétitions
   "data": [
     {
       "idcompetition": 1,
+      "nomcompetition": "Championnat National 2024",
       "datecompetition": "2024-02-15T00:00:00.000Z",
       "idutilisateur": 1,
       "nomutilisateur": "Admin",
@@ -700,6 +704,7 @@ Récupère une compétition avec ses juges assignés
   "success": true,
   "data": {
     "idcompetition": 1,
+    "nomcompetition": "Championnat National 2024",
     "datecompetition": "2024-02-15T00:00:00.000Z",
     "juges": [
       {
@@ -722,6 +727,7 @@ Création d'une nouvelle compétition
 **Body :**
 ```json
 {
+  "nomcompetition": "Championnat Régional 2024",
   "datecompetition": "2024-03-15",
   "idutilisateur": 1
 }
@@ -763,7 +769,7 @@ Retirer un juge d'une compétition
 
 ---
 
-### 🆕 Routes Juges
+### Routes Juges
 
 #### GET `/judges`
 Liste tous les juges
@@ -829,7 +835,7 @@ Suppression d'un juge
 
 ---
 
-### 🆕 Routes QR Code Authentication
+### Routes QR Code Authentication
 
 #### POST `/qr/generate`
 Génération d'un QR Code pour un juge spécifique
@@ -858,6 +864,7 @@ Génération d'un QR Code pour un juge spécifique
     },
     "competitionInfo": {
       "idcompetition": 1,
+      "nomcompetition": "Championnat National 2024",
       "datecompetition": "2024-02-15T00:00:00.000Z"
     },
     "expiresAt": "2024-02-15T23:59:59.999Z"
@@ -918,6 +925,7 @@ Validation d'un QR Code par un juge
     },
     "competition": {
       "idcompetition": 1,
+      "nomcompetition": "Championnat National 2024",
       "datecompetition": "2024-02-15T00:00:00.000Z"
     },
     "message": "Authentification réussie pour la compétition du 2024-02-15"
@@ -944,6 +952,7 @@ Statut des QR Codes pour une compétition
   "data": {
     "competition": {
       "idcompetition": 1,
+      "nomcompetition": "Championnat National 2024",
       "datecompetition": "2024-02-15T00:00:00.000Z",
       "isToday": false
     },
@@ -1032,6 +1041,7 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
   -d '{
     "nomutilisateur": "Dupont",
     "prenomutilisateur": "Jean",
+    "email": "jean.dupont@example.com",
     "username": "jean.dupont",
     "password": "motdepasse123",
     "idrole": 2
@@ -1093,13 +1103,14 @@ curl -X POST http://localhost:3000/api/v1/fiches-notation/create \
   }'
 ```
 
-### 🆕 Workflow complet QR Code pour une compétition
+### Workflow complet QR Code pour une compétition
 ```bash
 # 1. Créer une compétition (SUPER_ADMIN requis)
 curl -X POST http://localhost:3000/api/v1/competitions/create \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
+    "nomcompetition": "Concours de Printemps 2024",
     "datecompetition": "2024-03-15",
     "idutilisateur": 1
   }'
@@ -1159,13 +1170,13 @@ PORT=3000
 3. **Validation** : Toutes les entrées sont validées côté serveur
 4. **Logs** : Les erreurs sont loggées pour faciliter le debugging
 5. **Tests** : Suite de tests unitaires disponible avec `npm test`
-6. **🆕 QR Code** : Authentification sécurisée avec JWT competition-based
-7. **🆕 Competition Management** : Gestion complète des compétitions et assignations
-8. **🆕 Judge Management** : CRUD complet pour les juges avec relations
-9. **🆕 Security** : QR Codes valides uniquement le jour de compétition
-10. **🆕 Scalability** : Génération en masse et stateless architecture
-11. **🆕 New Schema** : Épreuves liées aux juges, fiches de notation liées aux épreuves
+6. **QR Code** : Authentification sécurisée avec JWT competition-based
+7. **Competition Management** : Gestion complète des compétitions et assignations
+8. **Judge Management** : CRUD complet pour les juges avec relations
+9. **Security** : QR Codes valides uniquement le jour de compétition
+10. **Scalability** : Génération en masse et stateless architecture
+11. **Schema** : Épreuves liées aux juges, fiches de notation liées aux épreuves
 
 ---
 
-*Documentation générée automatiquement - Version 2.0.0* 🆕
+*Documentation générée automatiquement - Version 2.0.0*
