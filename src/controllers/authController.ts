@@ -9,12 +9,22 @@ const authService = new AuthService(userModel);
 
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { nomutilisateur, prenomutilisateur, username, password, idjuge, idrole } = req.body;
+        const { nomutilisateur, prenomutilisateur, email, username, password, idjuge, idrole } = req.body;
 
-        if (!nomutilisateur || !prenomutilisateur || !username || !password || !idrole) {
+        if (!nomutilisateur || !prenomutilisateur || !email || !username || !password || !idrole) {
             res.status(400).json({
                 success: false,
-                message: 'Nom, prénom, nom d\'utilisateur, mot de passe et rôle requis'
+                message: 'Nom, prénom, email, nom d\'utilisateur, mot de passe et rôle requis'
+            });
+            return;
+        }
+
+        // Validation du format email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            res.status(400).json({
+                success: false,
+                message: 'Format d\'email invalide'
             });
             return;
         }
@@ -22,6 +32,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         const result = await authService.register({
             nomutilisateur,
             prenomutilisateur,
+            email,
             username,
             password,
             idjuge: idjuge || null,

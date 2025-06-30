@@ -37,7 +37,7 @@ export const authenticateToken = async (
 
         req.user = {
             id: user.idutilisateur.toString(),
-            email: user.username,
+            email: user.email,
             role: user.idrole.toString()
         };
 
