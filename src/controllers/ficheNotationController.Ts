@@ -79,6 +79,32 @@ export class FicheNotationController {
         }
     }
 
+    static async getFichesNotationByEpreuve(req: Request, res: Response): Promise<void> {
+        try {
+            const epreuveId = parseInt(req.params.epreuveId);
+            if (isNaN(epreuveId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID épreuve invalide'
+                });
+                return;
+            }
+
+            const fiches = await FicheNotationService.getFichesNotationByEpreuve(epreuveId);
+            res.json({
+                success: true,
+                data: fiches,
+                message: 'Fiches de notation de l\'épreuve récupérées avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des fiches de notation de l\'épreuve:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la récupération des fiches de notation de l\'épreuve'
+            });
+        }
+    }
+
     static async createFicheNotation(req: Request, res: Response): Promise<void> {
         try {
             const nouvelleFiche = await FicheNotationService.createFicheNotation(req.body);
