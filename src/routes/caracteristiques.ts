@@ -12,7 +12,7 @@ router.get('/epreuve/:epreuveId', authenticateToken, CaracteristiqueController.g
 
 router.post('/create', authenticateToken, requireSuperAdmin, CaracteristiqueController.createCaracteristique);
 
-router.put('/:id', authenticateToken, require, CaracteristiqueController.updateCaracteristique);
+router.put('/:id', authenticateToken, requireSuperAdmin, CaracteristiqueController.updateCaracteristique);
 
 router.delete('/:id', authenticateToken, requireSuperAdmin, CaracteristiqueController.deleteCaracteristique);
 

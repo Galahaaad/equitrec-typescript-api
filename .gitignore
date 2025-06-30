@@ -11,3 +11,6 @@ coverage/
 *.swp
 *.swo
 *~
+
+# Claude Code context files
+CLAUDE.local.md
