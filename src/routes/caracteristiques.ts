@@ -1,7 +1,6 @@
 import express from 'express';
 import { CaracteristiqueController } from '../controllers/caracteristiqueController';
-import { authenticateToken } from '../middleware/auth';
-import { requireRole } from '../middleware/roleCheck';
+import {authenticateToken, requireSuperAdmin} from "../middlewares/auth";
 
 const router = express.Router();
 
@@ -11,14 +10,14 @@ router.get('/:id', authenticateToken, CaracteristiqueController.getCaracteristiq
 
 router.get('/epreuve/:epreuveId', authenticateToken, CaracteristiqueController.getCaracteristiquesByEpreuve);
 
-router.post('/create', authenticateToken, requireRole(['SUPER_ADMIN']), CaracteristiqueController.createCaracteristique);
+router.post('/create', authenticateToken, requireSuperAdmin, CaracteristiqueController.createCaracteristique);
 
-router.put('/:id', authenticateToken, requireRole(['SUPER_ADMIN']), CaracteristiqueController.updateCaracteristique);
+router.put('/:id', authenticateToken, require, CaracteristiqueController.updateCaracteristique);
 
-router.delete('/:id', authenticateToken, requireRole(['SUPER_ADMIN']), CaracteristiqueController.deleteCaracteristique);
+router.delete('/:id', authenticateToken, requireSuperAdmin, CaracteristiqueController.deleteCaracteristique);
 
-router.post('/epreuve/:epreuveId/assign', authenticateToken, requireRole(['SUPER_ADMIN', 'JUGE']), CaracteristiqueController.assignCaracteristiqueToEpreuve);
+router.post('/epreuve/:epreuveId/assign', authenticateToken, requireSuperAdmin, CaracteristiqueController.assignCaracteristiqueToEpreuve);
 
-router.delete('/epreuve/:epreuveId/caracteristique/:caracteristiqueId', authenticateToken, requireRole(['SUPER_ADMIN', 'JUGE']), CaracteristiqueController.removeCaracteristiqueFromEpreuve);
+router.delete('/epreuve/:epreuveId/caracteristique/:caracteristiqueId', authenticateToken, requireSuperAdmin, CaracteristiqueController.removeCaracteristiqueFromEpreuve);
 
 export default router;
