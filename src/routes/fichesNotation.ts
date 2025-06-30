@@ -7,6 +7,7 @@ const router = Router();
 router.get('/', authenticateToken, FicheNotationController.getAllFichesNotation);
 router.get('/:id', authenticateToken, FicheNotationController.getFicheNotationById);
 router.get('/cavalier/:cavalierId', authenticateToken, FicheNotationController.getFichesNotationByCavalier);
+router.get('/epreuve/:epreuveId', authenticateToken, FicheNotationController.getFichesNotationByEpreuve);
 router.post('/create', authenticateToken, requireJudgeRole, FicheNotationController.createFicheNotation);
 router.put('/:id', authenticateToken, requireJudgeRole, FicheNotationController.updateFicheNotation);
 router.delete('/:id', authenticateToken, requireJudgeRole, FicheNotationController.deleteFicheNotation);

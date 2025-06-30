@@ -53,28 +53,28 @@ export class EpreuveController {
         }
     }
 
-    static async getEpreuvesByFicheNotation(req: Request, res: Response): Promise<void> {
+    static async getEpreuvesByJuge(req: Request, res: Response): Promise<void> {
         try {
-            const ficheNotationId = parseInt(req.params.ficheNotationId);
-            if (isNaN(ficheNotationId)) {
+            const jugeId = parseInt(req.params.jugeId);
+            if (isNaN(jugeId)) {
                 res.status(400).json({
                     success: false,
-                    message: 'ID fiche de notation invalide'
+                    message: 'ID juge invalide'
                 });
                 return;
             }
 
-            const epreuves = await EpreuveService.getEpreuvesByFicheNotation(ficheNotationId);
+            const epreuves = await EpreuveService.getEpreuvesByJuge(jugeId);
             res.json({
                 success: true,
                 data: epreuves,
-                message: 'Épreuves de la fiche de notation récupérées avec succès'
+                message: 'Épreuves du juge récupérées avec succès'
             });
         } catch (error) {
-            console.error('Erreur lors de la récupération des épreuves par fiche de notation:', error);
+            console.error('Erreur lors de la récupération des épreuves par juge:', error);
             res.status(500).json({
                 success: false,
-                message: 'Erreur lors de la récupération des épreuves par fiche de notation'
+                message: 'Erreur lors de la récupération des épreuves par juge'
             });
         }
     }

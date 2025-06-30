@@ -2,6 +2,7 @@ export interface Juge {
     idjuge: number;
     nomjuge: string;
     prenomjuge: string;
+    codepin?: string;
 }
 
 export interface CreateJugeRequest {

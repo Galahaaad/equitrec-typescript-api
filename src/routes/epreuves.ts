@@ -6,7 +6,7 @@ const router = Router();
 
 router.get('/', authenticateToken, EpreuveController.getAllEpreuves);
 router.get('/:id', authenticateToken, EpreuveController.getEpreuveById);
-router.get('/fiche/:ficheNotationId', authenticateToken, EpreuveController.getEpreuvesByFicheNotation);
+router.get('/juge/:jugeId', authenticateToken, EpreuveController.getEpreuvesByJuge);
 router.post('/create', authenticateToken, requireJudgeRole, EpreuveController.createEpreuve);
 router.put('/:id', authenticateToken, requireJudgeRole, EpreuveController.updateEpreuve);
 router.delete('/:id', authenticateToken, requireJudgeRole, EpreuveController.deleteEpreuve);

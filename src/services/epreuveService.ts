@@ -6,9 +6,11 @@ export class EpreuveService {
     static async getAllEpreuves(): Promise<Epreuve[]> {
         try {
             const query = `
-                SELECT idepreuve, titre, description, idfichenotation 
-                FROM epreuve
-                ORDER BY idepreuve ASC
+                SELECT e.idepreuve, e.titre, e.description, e.idjuge,
+                       j.nomjuge, j.prenomjuge
+                FROM epreuve e
+                LEFT JOIN juge j ON e.idjuge = j.idjuge
+                ORDER BY e.idepreuve ASC
             `;
             const result = await pool.query(query);
             return result.rows;
@@ -21,9 +23,11 @@ export class EpreuveService {
     static async getEpreuveById(id: number): Promise<Epreuve> {
         try {
             const query = `
-                SELECT idepreuve, titre, description, idfichenotation 
-                FROM epreuve
-                WHERE idepreuve = $1
+                SELECT e.idepreuve, e.titre, e.description, e.idjuge,
+                       j.nomjuge, j.prenomjuge
+                FROM epreuve e
+                LEFT JOIN juge j ON e.idjuge = j.idjuge
+                WHERE e.idepreuve = $1
             `;
             const result = await pool.query(query, [id]);
 
@@ -38,19 +42,21 @@ export class EpreuveService {
         }
     }
 
-    static async getEpreuvesByFicheNotation(ficheNotationId: number): Promise<Epreuve[]> {
+    static async getEpreuvesByJuge(jugeId: number): Promise<Epreuve[]> {
         try {
             const query = `
-                SELECT idepreuve, titre, description, idfichenotation 
-                FROM epreuve
-                WHERE idfichenotation = $1
-                ORDER BY idepreuve ASC
+                SELECT e.idepreuve, e.titre, e.description, e.idjuge,
+                       j.nomjuge, j.prenomjuge
+                FROM epreuve e
+                LEFT JOIN juge j ON e.idjuge = j.idjuge
+                WHERE e.idjuge = $1
+                ORDER BY e.idepreuve ASC
             `;
-            const result = await pool.query(query, [ficheNotationId]);
+            const result = await pool.query(query, [jugeId]);
             return result.rows;
         } catch (error) {
-            console.error('Erreur lors de la récupération des épreuves par fiche de notation:', error);
-            throw new Error('Erreur lors de la récupération des épreuves par fiche de notation');
+            console.error('Erreur lors de la récupération des épreuves par juge:', error);
+            throw new Error('Erreur lors de la récupération des épreuves par juge');
         }
     }
 
@@ -75,24 +81,22 @@ export class EpreuveService {
             const titreTrimmed = epreuveData.titre.trim();
             const descriptionTrimmed = epreuveData.description.trim();
 
-            // Vérifier que la fiche de notation existe si spécifiée
-            if (epreuveData.idfichenotation) {
-                const ficheCheckQuery = 'SELECT idfichenotation FROM fichenotation WHERE idfichenotation = $1';
-                const ficheCheckResult = await pool.query(ficheCheckQuery, [epreuveData.idfichenotation]);
-                if (ficheCheckResult.rows.length === 0) {
-                    throw new Error('La fiche de notation spécifiée n\'existe pas');
-                }
+            // Vérifier que le juge existe
+            const jugeCheckQuery = 'SELECT idjuge FROM juge WHERE idjuge = $1';
+            const jugeCheckResult = await pool.query(jugeCheckQuery, [epreuveData.idjuge]);
+            if (jugeCheckResult.rows.length === 0) {
+                throw new Error('Le juge spécifié n\'existe pas');
             }
 
             const insertQuery = `
-                INSERT INTO epreuve (titre, description, idfichenotation) 
+                INSERT INTO epreuve (titre, description, idjuge) 
                 VALUES ($1, $2, $3) 
-                RETURNING idepreuve, titre, description, idfichenotation
+                RETURNING idepreuve, titre, description, idjuge
             `;
             const insertResult = await pool.query(insertQuery, [
                 titreTrimmed,
                 descriptionTrimmed,
-                epreuveData.idfichenotation || null
+                epreuveData.idjuge
             ]);
 
             return insertResult.rows[0];
@@ -106,12 +110,12 @@ export class EpreuveService {
         try {
             const existingEpreuve = await this.getEpreuveById(id);
 
-            if (epreuveData.idfichenotation !== undefined && epreuveData.idfichenotation !== null) {
-                const ficheQuery = 'SELECT idfichenotation FROM fichenotation WHERE idfichenotation = $1';
-                const ficheResult = await pool.query(ficheQuery, [epreuveData.idfichenotation]);
+            if (epreuveData.idjuge !== undefined && epreuveData.idjuge !== null) {
+                const jugeQuery = 'SELECT idjuge FROM juge WHERE idjuge = $1';
+                const jugeResult = await pool.query(jugeQuery, [epreuveData.idjuge]);
 
-                if (ficheResult.rows.length === 0) {
-                    throw new Error('La fiche de notation spécifiée n\'existe pas');
+                if (jugeResult.rows.length === 0) {
+                    throw new Error('Le juge spécifié n\'existe pas');
                 }
             }
 
@@ -139,9 +143,9 @@ export class EpreuveService {
                 paramIndex++;
             }
 
-            if (epreuveData.idfichenotation !== undefined) {
-                updateFields.push(`idfichenotation = $${paramIndex}`);
-                values.push(epreuveData.idfichenotation);
+            if (epreuveData.idjuge !== undefined) {
+                updateFields.push(`idjuge = $${paramIndex}`);
+                values.push(epreuveData.idjuge);
                 paramIndex++;
             }
 
@@ -154,7 +158,7 @@ export class EpreuveService {
                 UPDATE epreuve 
                 SET ${updateFields.join(', ')} 
                 WHERE idepreuve = $${paramIndex}
-                RETURNING idepreuve, titre, description, idfichenotation
+                RETURNING idepreuve, titre, description, idjuge
             `;
 
             const updateResult = await pool.query(updateQuery, values);

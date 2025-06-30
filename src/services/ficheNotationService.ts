@@ -7,10 +7,12 @@ export class FicheNotationService {
         try {
             const query = `
                 SELECT fn.idfichenotation, fn.cumulenote, fn.appreciation, fn.isvalidate, 
-                       fn.idcavalier, c.nomcavalier, c.prenomcavalier, cl.nomclub 
+                       fn.idcavalier, fn.idepreuve, c.nomcavalier, c.prenomcavalier, cl.nomclub,
+                       e.titre
                 FROM fichenotation fn
                 LEFT JOIN cavalier c ON fn.idcavalier = c.idcavalier
                 LEFT JOIN club cl ON c.idclub = cl.idclub
+                LEFT JOIN epreuve e ON fn.idepreuve = e.idepreuve
                 ORDER BY fn.idfichenotation ASC
             `;
             const result = await pool.query(query);
@@ -25,10 +27,12 @@ export class FicheNotationService {
         try {
             const query = `
                 SELECT fn.idfichenotation, fn.cumulenote, fn.appreciation, fn.isvalidate, 
-                       fn.idcavalier, c.nomcavalier, c.prenomcavalier, cl.nomclub 
+                       fn.idcavalier, fn.idepreuve, c.nomcavalier, c.prenomcavalier, cl.nomclub,
+                       e.titre
                 FROM fichenotation fn
                 LEFT JOIN cavalier c ON fn.idcavalier = c.idcavalier
                 LEFT JOIN club cl ON c.idclub = cl.idclub
+                LEFT JOIN epreuve e ON fn.idepreuve = e.idepreuve
                 WHERE fn.idfichenotation = $1
             `;
             const result = await pool.query(query, [id]);
@@ -48,10 +52,12 @@ export class FicheNotationService {
         try {
             const query = `
                 SELECT fn.idfichenotation, fn.cumulenote, fn.appreciation, fn.isvalidate, 
-                       fn.idcavalier, c.nomcavalier, c.prenomcavalier, cl.nomclub 
+                       fn.idcavalier, fn.idepreuve, c.nomcavalier, c.prenomcavalier, cl.nomclub,
+                       e.titre
                 FROM fichenotation fn
                 LEFT JOIN cavalier c ON fn.idcavalier = c.idcavalier
                 LEFT JOIN club cl ON c.idclub = cl.idclub
+                LEFT JOIN epreuve e ON fn.idepreuve = e.idepreuve
                 WHERE fn.idcavalier = $1
                 ORDER BY fn.idfichenotation ASC
             `;
@@ -60,6 +66,27 @@ export class FicheNotationService {
         } catch (error) {
             console.error('Erreur lors de la récupération des fiches de notation du cavalier:', error);
             throw new Error('Erreur lors de la récupération des fiches de notation du cavalier');
+        }
+    }
+
+    static async getFichesNotationByEpreuve(epreuveId: number): Promise<FicheNotation[]> {
+        try {
+            const query = `
+                SELECT fn.idfichenotation, fn.cumulenote, fn.appreciation, fn.isvalidate, 
+                       fn.idcavalier, fn.idepreuve, c.nomcavalier, c.prenomcavalier, cl.nomclub,
+                       e.titre
+                FROM fichenotation fn
+                LEFT JOIN cavalier c ON fn.idcavalier = c.idcavalier
+                LEFT JOIN club cl ON c.idclub = cl.idclub
+                LEFT JOIN epreuve e ON fn.idepreuve = e.idepreuve
+                WHERE fn.idepreuve = $1
+                ORDER BY fn.idfichenotation ASC
+            `;
+            const result = await pool.query(query, [epreuveId]);
+            return result.rows;
+        } catch (error) {
+            console.error('Erreur lors de la récupération des fiches de notation de l\'épreuve:', error);
+            throw new Error('Erreur lors de la récupération des fiches de notation de l\'épreuve');
         }
     }
 
@@ -77,6 +104,10 @@ export class FicheNotationService {
                 throw new Error('Le cavalier est requis');
             }
 
+            if (!ficheData.idepreuve) {
+                throw new Error('L\'épreuve est requise');
+            }
+
             if (ficheData.appreciation.trim().length > 500) {
                 throw new Error('L\'appréciation ne peut pas dépasser 500 caractères');
             }
@@ -90,16 +121,24 @@ export class FicheNotationService {
                 throw new Error('Le cavalier spécifié n\'existe pas');
             }
 
+            // Vérifier que l'épreuve existe
+            const epreuveCheckQuery = 'SELECT idepreuve FROM epreuve WHERE idepreuve = $1';
+            const epreuveCheckResult = await pool.query(epreuveCheckQuery, [ficheData.idepreuve]);
+            if (epreuveCheckResult.rows.length === 0) {
+                throw new Error('L\'épreuve spécifiée n\'existe pas');
+            }
+
             const insertQuery = `
-                INSERT INTO fichenotation (cumulenote, appreciation, isvalidate, idcavalier) 
-                VALUES ($1, $2, $3, $4) 
-                RETURNING idfichenotation, cumulenote, appreciation, isvalidate, idcavalier
+                INSERT INTO fichenotation (cumulenote, appreciation, isvalidate, idcavalier, idepreuve) 
+                VALUES ($1, $2, $3, $4, $5) 
+                RETURNING idfichenotation, cumulenote, appreciation, isvalidate, idcavalier, idepreuve
             `;
             const insertResult = await pool.query(insertQuery, [
                 ficheData.cumulenote,
                 appreciationTrimmed,
                 ficheData.isvalidate || false, // Default false
-                ficheData.idcavalier
+                ficheData.idcavalier,
+                ficheData.idepreuve
             ]);
 
             return insertResult.rows[0];
@@ -119,6 +158,15 @@ export class FicheNotationService {
 
                 if (cavalierResult.rows.length === 0) {
                     throw new Error('Le cavalier spécifié n\'existe pas');
+                }
+            }
+
+            if (ficheData.idepreuve !== undefined) {
+                const epreuveQuery = 'SELECT idepreuve FROM epreuve WHERE idepreuve = $1';
+                const epreuveResult = await pool.query(epreuveQuery, [ficheData.idepreuve]);
+
+                if (epreuveResult.rows.length === 0) {
+                    throw new Error('L\'épreuve spécifiée n\'existe pas');
                 }
             }
 
@@ -154,6 +202,12 @@ export class FicheNotationService {
                 paramIndex++;
             }
 
+            if (ficheData.idepreuve !== undefined) {
+                updateFields.push(`idepreuve = $${paramIndex}`);
+                values.push(ficheData.idepreuve);
+                paramIndex++;
+            }
+
             if (updateFields.length === 0) {
                 throw new Error('Aucune donnée à mettre à jour');
             }
@@ -163,7 +217,7 @@ export class FicheNotationService {
                 UPDATE fichenotation 
                 SET ${updateFields.join(', ')} 
                 WHERE idfichenotation = $${paramIndex}
-                RETURNING idfichenotation, cumulenote, appreciation, isvalidate, idcavalier
+                RETURNING idfichenotation, cumulenote, appreciation, isvalidate, idcavalier, idepreuve
             `;
 
             const updateResult = await pool.query(updateQuery, values);
@@ -184,7 +238,7 @@ export class FicheNotationService {
         try {
             await client.query('BEGIN');
             await this.getFicheNotationById(id);
-            await client.query('UPDATE epreuve SET idfichenotation = NULL WHERE idfichenotation = $1', [id]);
+            // Les épreuves ne sont plus liées aux fiches de notation - pas besoin de cette ligne
             await client.query('DELETE FROM contenir WHERE idfichenotation = $1', [id]);
             await client.query('DELETE FROM fichenotation WHERE idfichenotation = $1', [id]);
             await client.query('COMMIT');

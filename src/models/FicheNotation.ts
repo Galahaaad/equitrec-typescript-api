@@ -4,9 +4,11 @@ export interface FicheNotation {
     appreciation: string;
     isvalidate: boolean;
     idcavalier: number;
+    idepreuve: number;
     nomcavalier?: string;
     prenomcavalier?: string;
     nomclub?: string;
+    titre?: string;
 }
 
 export interface CreateFicheNotationRequest {
@@ -14,6 +16,7 @@ export interface CreateFicheNotationRequest {
     appreciation: string;
     isvalidate?: boolean;
     idcavalier: number;
+    idepreuve: number;
 }
 
 export interface UpdateFicheNotationRequest {
@@ -21,6 +24,7 @@ export interface UpdateFicheNotationRequest {
     appreciation?: string;
     isvalidate?: boolean;
     idcavalier?: number;
+    idepreuve?: number;
 }
 
 export interface CreateFicheNotationResponse {
@@ -29,4 +33,5 @@ export interface CreateFicheNotationResponse {
     appreciation: string;
     isvalidate: boolean;
     idcavalier: number;
+    idepreuve: number;
 }

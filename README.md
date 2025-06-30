@@ -44,8 +44,8 @@ Authorization: Bearer <votre_token_jwt>
 
 ### Rôles disponibles :
 - **SUPER_ADMIN** (idrole: 1) : Accès complet + gestion QR Codes
-- **JUDGE** (idrole: 2) : Gestion des notations et épreuves + authentification QR
-- **USER** (idrole: 3) : Lecture seule
+- **GÉRANT** (idrole: 2) : Gestion intermédiaire
+- **JUGE** (idrole: 3) : Gestion des notations et épreuves + authentification QR
 
 ### 🆕 Authentification QR Code :
 Les juges peuvent s'authentifier via QR Code pour les compétitions :
@@ -99,9 +99,11 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
   appreciation: string;
   isvalidate: boolean;
   idcavalier: number;
+  idepreuve: number;
   nomcavalier?: string;
   prenomcavalier?: string;
   nomclub?: string;
+  titre?: string;
 }
 ```
 
@@ -111,7 +113,9 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
   idepreuve: number;
   titre: string;
   description: string;
-  idfichenotation?: number;
+  idjuge: number;
+  nomjuge?: string;
+  prenomjuge?: string;
 }
 ```
 
@@ -132,6 +136,7 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
   idjuge: number;
   nomjuge: string;
   prenomjuge: string;
+  codepin?: string;
 }
 ```
 
@@ -143,6 +148,52 @@ Les juges peuvent s'authentifier via QR Code pour les compétitions :
   competitionId: number;
   competitionDate: string;
   expiresAt: Date;
+}
+```
+
+### 🆕 Niveau
+```typescript
+{
+  idniveau: number;
+  libelle: string;
+  description: string;
+}
+```
+
+### 🆕 Critere
+```typescript
+{
+  idcritere: number;
+  libelle: string;
+  idniveau: number;
+  libelleniveau?: string;
+  descriptionniveau?: string;
+}
+```
+
+### 🆕 Categorie
+```typescript
+{
+  idcategorie: number;
+  libelle: string;
+  notefinal: number;
+}
+```
+
+### 🆕 Materiel
+```typescript
+{
+  idmateriel: number;
+  libelle: string;
+}
+```
+
+### 🆕 Caracteristique
+```typescript
+{
+  idcaracteristique: number;
+  libelle: string;
+  description: string;
 }
 ```
 
@@ -413,9 +464,11 @@ Liste toutes les fiches de notation
       "appreciation": "Très bonne performance",
       "isvalidate": false,
       "idcavalier": 1,
+      "idepreuve": 1,
       "nomcavalier": "Martin",
       "prenomcavalier": "Sophie",
-      "nomclub": "Club Équestre de Paris"
+      "nomclub": "Club Équestre de Paris",
+      "titre": "Bordure Maraîchère en Selle"
     }
   ],
   "message": "Fiches de notation récupérées avec succès"
@@ -436,6 +489,13 @@ Récupère les fiches de notation d'un cavalier
 **Headers :** `Authorization: Bearer <token>`  
 **Paramètres :** `cavalierId` (number)
 
+#### GET `/fiches-notation/epreuve/:epreuveId`
+Récupère les fiches de notation d'une épreuve
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `epreuveId` (number)
+
 #### POST `/fiches-notation/create`
 Création d'une nouvelle fiche de notation
 
@@ -447,7 +507,8 @@ Création d'une nouvelle fiche de notation
   "cumulenote": 92,
   "appreciation": "Excellente performance, technique maîtrisée",
   "isvalidate": false,
-  "idcavalier": 1
+  "idcavalier": 1,
+  "idepreuve": 1
 }
 ```
 
@@ -460,7 +521,8 @@ Création d'une nouvelle fiche de notation
     "cumulenote": 92,
     "appreciation": "Excellente performance, technique maîtrisée",
     "isvalidate": false,
-    "idcavalier": 1
+    "idcavalier": 1,
+    "idepreuve": 1
   },
   "message": "Fiche de notation créée avec succès"
 }
@@ -478,7 +540,8 @@ Mise à jour d'une fiche de notation
   "cumulenote": 88,
   "appreciation": "Performance améliorée",
   "isvalidate": true,
-  "idcavalier": 2
+  "idcavalier": 2,
+  "idepreuve": 1
 }
 ```
 
@@ -489,7 +552,7 @@ Suppression d'une fiche de notation
 **Headers :** `Authorization: Bearer <token>`  
 **Paramètres :** `id` (number)
 
-**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans les tables `epreuve` et `contenir`.
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans la table `contenir`.
 
 ---
 
@@ -510,7 +573,9 @@ Liste toutes les épreuves
       "idepreuve": 1,
       "titre": "Saut d'obstacles",
       "description": "Épreuve de saut avec parcours technique de niveau amateur",
-      "idfichenotation": 1
+      "idjuge": 1,
+      "nomjuge": "Yazbek",
+      "prenomjuge": "Rachel"
     }
   ],
   "message": "Épreuves récupérées avec succès"
@@ -524,12 +589,12 @@ Récupère une épreuve par ID
 **Headers :** `Authorization: Bearer <token>`  
 **Paramètres :** `id` (number)
 
-#### GET `/epreuves/fiche/:ficheNotationId`
-Récupère les épreuves d'une fiche de notation
+#### GET `/epreuves/juge/:jugeId`
+Récupère les épreuves d'un juge
 
 **Pré-requis :** Token JWT valide  
 **Headers :** `Authorization: Bearer <token>`  
-**Paramètres :** `ficheNotationId` (number)
+**Paramètres :** `jugeId` (number)
 
 #### POST `/epreuves/create`
 Création d'une nouvelle épreuve
@@ -541,7 +606,7 @@ Création d'une nouvelle épreuve
 {
   "titre": "Dressage libre",
   "description": "Épreuve de dressage avec musique et chorégraphie libre",
-  "idfichenotation": 1
+  "idjuge": 1
 }
 ```
 
@@ -553,7 +618,7 @@ Création d'une nouvelle épreuve
     "idepreuve": 2,
     "titre": "Dressage libre",
     "description": "Épreuve de dressage avec musique et chorégraphie libre",
-    "idfichenotation": 1
+    "idjuge": 1
   },
   "message": "Épreuve créée avec succès"
 }
@@ -562,7 +627,7 @@ Création d'une nouvelle épreuve
 **Validation :**
 - `titre` : requis, max 100 caractères
 - `description` : requise, max 500 caractères
-- `idfichenotation` : optionnel, doit exister si spécifié
+- `idjuge` : requis, doit exister
 
 #### PUT `/epreuves/:id`
 Mise à jour d'une épreuve
@@ -575,7 +640,7 @@ Mise à jour d'une épreuve
 {
   "titre": "Nouveau titre",
   "description": "Nouvelle description",
-  "idfichenotation": 2
+  "idjuge": 2
 }
 ```
 
@@ -1005,24 +1070,26 @@ curl -X POST http://localhost:3000/api/v1/cavaliers/create \
     "idclub": 1
   }'
 
-# 3. Créer une fiche de notation (JUDGE requis)
-curl -X POST http://localhost:3000/api/v1/fiches-notation/create \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "cumulenote": 85,
-    "appreciation": "Très bonne performance",
-    "idcavalier": 1
-  }'
-
-# 4. Créer une épreuve (JUDGE requis)
+# 3. Créer une épreuve (JUGE requis)
 curl -X POST http://localhost:3000/api/v1/epreuves/create \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "titre": "Saut d obstacles",
-    "description": "Épreuve technique de saut",
-    "idfichenotation": 1
+    "titre": "Bordure Maraîchère en Selle",
+    "description": "Épreuve pour démo",
+    "idjuge": 1
+  }'
+
+# 4. Créer une fiche de notation (JUGE requis)
+curl -X POST http://localhost:3000/api/v1/fiches-notation/create \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cumulenote": 10,
+    "appreciation": "Très bon cavalier, bonne technique.",
+    "isvalidate": true,
+    "idcavalier": 1,
+    "idepreuve": 1
   }'
 ```
 
@@ -1097,6 +1164,7 @@ PORT=3000
 8. **🆕 Judge Management** : CRUD complet pour les juges avec relations
 9. **🆕 Security** : QR Codes valides uniquement le jour de compétition
 10. **🆕 Scalability** : Génération en masse et stateless architecture
+11. **🆕 New Schema** : Épreuves liées aux juges, fiches de notation liées aux épreuves
 
 ---
 
