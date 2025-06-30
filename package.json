@@ -14,7 +14,8 @@
     "start": "node dist/server.js",
     "start:dev": "ts-node src/server.ts",
     "clean": "rm -rf dist",
-    "hash-passwords": "ts-node src/scripts/hashExistingPasswords.ts"
+    "hash-passwords": "ts-node src/scripts/hashExistingPasswords.ts",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml down -v && docker-compose -f docker-compose.dev.yml up --build"
   },
   "keywords": [],
   "author": "",
