@@ -9,6 +9,7 @@ import competitionRoutes from './competitions';
 import jugeRoutes from './judges';
 import qrRoutes from './qr';
 import caracteristiqueRoutes from './caracteristiques';
+import materielRoutes from './materiaux';
 
 const router = express.Router();
 
@@ -21,6 +22,7 @@ router.use('/competitions', competitionRoutes);
 router.use('/judges', jugeRoutes);
 router.use('/qr', qrRoutes);
 router.use('/caracteristiques', caracteristiqueRoutes);
+router.use('/materiaux', materielRoutes);
 
 router.get('/health', async (req, res) => {
     try {

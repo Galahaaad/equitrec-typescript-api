@@ -16,6 +16,7 @@ API REST pour la gestion des compétitions équestres avec système de notation,
   - [Compétitions](#routes-compétitions)
   - [Juges](#routes-juges)
   - [Caractéristiques](#routes-caractéristiques)
+  - [Matériaux](#routes-matériaux)
   - [QR Code Authentication](#routes-qr-code)
   - [Utilitaires](#routes-utilitaires)
 - [Codes d'erreur](#codes-derreur)
@@ -823,6 +824,195 @@ Retirer une caractéristique d'une épreuve
 
 ---
 
+### Routes Matériaux
+
+#### GET `/materiaux`
+Liste tous les matériaux
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "idmateriel": 1,
+      "libelle": "Fanions rouges"
+    },
+    {
+      "idmateriel": 2,
+      "libelle": "Barres ou demi-rondes de 4 mètres"
+    }
+  ],
+  "message": "Matériels récupérés avec succès"
+}
+```
+
+#### GET `/materiaux/:id`
+Récupère un matériel par ID
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idmateriel": 1,
+    "libelle": "Fanions rouges"
+  },
+  "message": "Matériel récupéré avec succès"
+}
+```
+
+#### GET `/materiaux/epreuve/:epreuveId`
+Récupère les matériaux requis pour une épreuve (avec quantités)
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `epreuveId` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "idmateriel": 1,
+      "libelle": "Fanions rouges",
+      "quantite": 2
+    },
+    {
+      "idmateriel": 4,
+      "libelle": "Barres ou demi-rondes de 4 mètres",
+      "quantite": 4
+    }
+  ],
+  "message": "Matériels de l'épreuve récupérés avec succès"
+}
+```
+
+#### POST `/materiaux/create`
+Création d'un nouveau matériel
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Body :**
+```json
+{
+  "libelle": "Cônes de signalisation"
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idmateriel": 5,
+    "libelle": "Cônes de signalisation"
+  },
+  "message": "Matériel créé avec succès"
+}
+```
+
+**Validation :**
+- `libelle` : requis, max 200 caractères
+
+#### PUT `/materiaux/:id`
+Mise à jour d'un matériel
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)  
+**Body :**
+```json
+{
+  "libelle": "Nouveau libellé"
+}
+```
+
+#### DELETE `/materiaux/:id`
+Suppression d'un matériel
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Matériel supprimé avec succès"
+}
+```
+
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans la table `avoir`.
+
+#### POST `/materiaux/epreuve/:epreuveId/assign`
+Assigner un matériel à une épreuve avec quantité
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `epreuveId` (number)  
+**Body :**
+```json
+{
+  "materielId": 1,
+  "quantite": 3
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Matériel assigné à l'épreuve avec succès"
+}
+```
+
+#### PUT `/materiaux/epreuve/:epreuveId/materiel/:materielId/quantite`
+Mettre à jour la quantité d'un matériel pour une épreuve
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `epreuveId` (number), `materielId` (number)  
+**Body :**
+```json
+{
+  "quantite": 5
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Quantité du matériel mise à jour avec succès"
+}
+```
+
+#### DELETE `/materiaux/epreuve/:epreuveId/materiel/:materielId`
+Retirer un matériel d'une épreuve
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `epreuveId` (number), `materielId` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Matériel retiré de l'épreuve avec succès"
+}
+```
+
+---
+
 ### Routes Compétitions
 
 #### GET `/competitions`
@@ -1368,6 +1558,7 @@ PORT=3000
 10. **Scalability** : Génération en masse et stateless architecture
 11. **Schema** : Épreuves liées aux juges, fiches de notation liées aux épreuves
 12. **Caracteristiques** : Gestion des caractéristiques d'épreuves avec table de liaison `posseder`
+13. **Matériaux** : Gestion des matériaux requis pour épreuves avec quantités via table `avoir`
 
 ---
 
