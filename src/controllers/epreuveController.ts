@@ -160,4 +160,116 @@ export class EpreuveController {
             }
         }
     }
+
+    static async getEpreuveWithCompetitions(req: Request, res: Response): Promise<void> {
+        try {
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID invalide'
+                });
+                return;
+            }
+
+            const epreuve = await EpreuveService.getEpreuveWithCompetitions(id);
+            res.json({
+                success: true,
+                data: epreuve,
+                message: 'Épreuve avec compétitions récupérée avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération de l\'épreuve avec compétitions:', error);
+            if (error instanceof Error && error.message === 'Épreuve non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors de la récupération de l\'épreuve avec compétitions'
+                });
+            }
+        }
+    }
+
+    static async addCompetitionToEpreuve(req: Request, res: Response): Promise<void> {
+        try {
+            const epreuveId = parseInt(req.params.id);
+            if (isNaN(epreuveId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID d\'épreuve invalide'
+                });
+                return;
+            }
+
+            const { competitionId } = req.body;
+            if (!competitionId || isNaN(parseInt(competitionId))) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de compétition requis et valide'
+                });
+                return;
+            }
+
+            await EpreuveService.addCompetitionToEpreuve(epreuveId, parseInt(competitionId));
+            res.json({
+                success: true,
+                message: 'Compétition assignée à l\'épreuve avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de l\'assignation de la compétition:', error);
+            if (error instanceof Error && (
+                error.message === 'Épreuve non trouvée' ||
+                error.message === 'La compétition spécifiée n\'existe pas' ||
+                error.message === 'Cette épreuve est déjà assignée à cette compétition'
+            )) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors de l\'assignation de la compétition'
+                });
+            }
+        }
+    }
+
+    static async removeCompetitionFromEpreuve(req: Request, res: Response): Promise<void> {
+        try {
+            const epreuveId = parseInt(req.params.epreuveId);
+            const competitionId = parseInt(req.params.competitionId);
+
+            if (isNaN(epreuveId) || isNaN(competitionId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'IDs d\'épreuve et compétition requis et valides'
+                });
+                return;
+            }
+
+            await EpreuveService.removeCompetitionFromEpreuve(epreuveId, competitionId);
+            res.json({
+                success: true,
+                message: 'Compétition retirée de l\'épreuve avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors du retrait de la compétition:', error);
+            if (error instanceof Error && error.message === 'Assignation non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors du retrait de la compétition'
+                });
+            }
+        }
+    }
 }

@@ -594,6 +594,39 @@ Récupère une épreuve par ID
 **Headers :** `Authorization: Bearer <token>`  
 **Paramètres :** `id` (number)
 
+#### GET `/epreuves/:id/competitions`
+Récupère une épreuve avec ses compétitions assignées
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idepreuve": 1,
+    "titre": "Saut d'obstacles",
+    "description": "Épreuve de saut avec parcours technique de niveau amateur",
+    "idjuge": 1,
+    "nomjuge": "Yazbek",
+    "prenomjuge": "Rachel",
+    "competitions": [
+      {
+        "idcompetition": 1,
+        "nomcompetition": "Championnat National 2024",
+        "datecompetition": "2024-02-15T00:00:00.000Z",
+        "idutilisateur": 1,
+        "nomutilisateur": "Admin",
+        "prenomutilisateur": "System"
+      }
+    ]
+  },
+  "message": "Épreuve avec compétitions récupérée avec succès"
+}
+```
+
 #### GET `/epreuves/juge/:jugeId`
 Récupère les épreuves d'un juge
 
@@ -656,7 +689,45 @@ Suppression d'une épreuve
 **Headers :** `Authorization: Bearer <token>`  
 **Paramètres :** `id` (number)
 
-**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans les tables `detenir` et `posseder`.
+#### POST `/epreuves/:id/assign-competition`
+Assigner une compétition à une épreuve
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number - ID épreuve)  
+**Body :**
+```json
+{
+  "competitionId": 1
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Compétition assignée à l'épreuve avec succès"
+}
+```
+
+#### DELETE `/epreuves/:epreuveId/competitions/:competitionId`
+Retirer une compétition d'une épreuve
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** 
+- `epreuveId` (number)
+- `competitionId` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Compétition retirée de l'épreuve avec succès"
+}
+```
+
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans les tables `detenir`, `posseder` et `composer`.
 
 ---
 
@@ -1074,6 +1145,39 @@ Récupère une compétition avec ses juges assignés
 }
 ```
 
+#### GET `/competitions/:id/epreuves`
+Récupère une compétition avec ses épreuves assignées
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idcompetition": 1,
+    "nomcompetition": "Championnat National 2024",
+    "datecompetition": "2024-02-15T00:00:00.000Z",
+    "idutilisateur": 1,
+    "nomutilisateur": "Admin",
+    "prenomutilisateur": "System",
+    "epreuves": [
+      {
+        "idepreuve": 1,
+        "titre": "Dressage imposé",
+        "description": "Épreuve de dressage avec figures imposées",
+        "idjuge": 1,
+        "nomjuge": "Dubois",
+        "prenomjuge": "Marie"
+      }
+    ]
+  },
+  "message": "Compétition avec épreuves récupérée avec succès"
+}
+```
+
 #### POST `/competitions/create`
 Création d'une nouvelle compétition
 
@@ -1102,7 +1206,7 @@ Suppression d'une compétition
 **Headers :** `Authorization: Bearer <token>`  
 **Paramètres :** `id` (number)
 
-**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans les tables `juger` et `participer`.
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans les tables `juger`, `participer` et `composer`.
 
 #### POST `/competitions/:id/assign-judge`
 Assigner un juge à une compétition
@@ -1121,6 +1225,44 @@ Retirer un juge d'une compétition
 
 **Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
 **Headers :** `Authorization: Bearer <token>`
+
+#### POST `/competitions/:id/assign-epreuve`
+Assigner une épreuve à une compétition
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number - ID compétition)  
+**Body :**
+```json
+{
+  "epreuveId": 1
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Épreuve assignée à la compétition avec succès"
+}
+```
+
+#### DELETE `/competitions/:competitionId/epreuves/:epreuveId`
+Retirer une épreuve d'une compétition
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** 
+- `competitionId` (number)
+- `epreuveId` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Épreuve retirée de la compétition avec succès"
+}
+```
 
 ---
 

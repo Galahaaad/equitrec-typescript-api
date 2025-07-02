@@ -43,3 +43,22 @@ export interface JugeAssignment {
     hasUserAccount: boolean;
     idutilisateur?: number;
 }
+
+export interface CompetitionWithEpreuves {
+    idcompetition: number;
+    nomcompetition?: string;
+    datecompetition: Date;
+    idutilisateur: number;
+    nomutilisateur?: string;
+    prenomutilisateur?: string;
+    epreuves: EpreuveInCompetition[];
+}
+
+export interface EpreuveInCompetition {
+    idepreuve: number;
+    titre: string;
+    description: string;
+    idjuge: number;
+    nomjuge?: string;
+    prenomjuge?: string;
+}

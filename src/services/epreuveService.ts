@@ -1,5 +1,5 @@
 import { pool } from '../config/database';
-import { Epreuve, CreateEpreuveRequest, UpdateEpreuveRequest, CreateEpreuveResponse } from '../models/Epreuve';
+import { Epreuve, CreateEpreuveRequest, UpdateEpreuveRequest, CreateEpreuveResponse, EpreuveWithCompetitions, CompetitionInEpreuve } from '../models/Epreuve';
 
 export class EpreuveService {
 
@@ -181,6 +181,7 @@ export class EpreuveService {
             await this.getEpreuveById(id);
             await client.query('DELETE FROM detenir WHERE idepreuve = $1', [id]);
             await client.query('DELETE FROM posseder WHERE idepreuve = $1', [id]);
+            await client.query('DELETE FROM composer WHERE idepreuve = $1', [id]);
             await client.query('DELETE FROM epreuve WHERE idepreuve = $1', [id]);
             await client.query('COMMIT');
         } catch (error) {
@@ -189,6 +190,78 @@ export class EpreuveService {
             throw error;
         } finally {
             client.release();
+        }
+    }
+
+    static async getEpreuveWithCompetitions(id: number): Promise<EpreuveWithCompetitions> {
+        try {
+            const epreuve = await this.getEpreuveById(id);
+            
+            const competitionsQuery = `
+                SELECT c.idcompetition, c.nomcompetition, c.datecompetition, c.idutilisateur,
+                       u.nomutilisateur, u.prenomutilisateur
+                FROM composer comp
+                JOIN competition c ON comp.idcompetition = c.idcompetition
+                LEFT JOIN utilisateur u ON c.idutilisateur = u.idutilisateur
+                WHERE comp.idepreuve = $1
+                ORDER BY c.datecompetition DESC
+            `;
+            
+            const competitionsResult = await pool.query(competitionsQuery, [id]);
+            const competitions: CompetitionInEpreuve[] = competitionsResult.rows.map(row => ({
+                idcompetition: row.idcompetition,
+                nomcompetition: row.nomcompetition,
+                datecompetition: row.datecompetition,
+                idutilisateur: row.idutilisateur,
+                nomutilisateur: row.nomutilisateur,
+                prenomutilisateur: row.prenomutilisateur
+            }));
+
+            return {
+                ...epreuve,
+                competitions
+            };
+        } catch (error) {
+            console.error('Erreur lors de la récupération de l\'épreuve avec compétitions:', error);
+            throw error;
+        }
+    }
+
+    static async addCompetitionToEpreuve(epreuveId: number, competitionId: number): Promise<void> {
+        try {
+            await this.getEpreuveById(epreuveId);
+
+            const competitionCheckQuery = 'SELECT idcompetition FROM competition WHERE idcompetition = $1';
+            const competitionCheckResult = await pool.query(competitionCheckQuery, [competitionId]);
+            if (competitionCheckResult.rows.length === 0) {
+                throw new Error('La compétition spécifiée n\'existe pas');
+            }
+
+            const existingQuery = 'SELECT * FROM composer WHERE idcompetition = $1 AND idepreuve = $2';
+            const existingResult = await pool.query(existingQuery, [competitionId, epreuveId]);
+            if (existingResult.rows.length > 0) {
+                throw new Error('Cette épreuve est déjà assignée à cette compétition');
+            }
+
+            const insertQuery = 'INSERT INTO composer (idcompetition, idepreuve) VALUES ($1, $2)';
+            await pool.query(insertQuery, [competitionId, epreuveId]);
+        } catch (error) {
+            console.error('Erreur lors de l\'assignation de la compétition:', error);
+            throw error;
+        }
+    }
+
+    static async removeCompetitionFromEpreuve(epreuveId: number, competitionId: number): Promise<void> {
+        try {
+            const deleteQuery = 'DELETE FROM composer WHERE idcompetition = $1 AND idepreuve = $2';
+            const result = await pool.query(deleteQuery, [competitionId, epreuveId]);
+            
+            if (result.rowCount === 0) {
+                throw new Error('Assignation non trouvée');
+            }
+        } catch (error) {
+            console.error('Erreur lors du retrait de la compétition:', error);
+            throw error;
         }
     }
 }

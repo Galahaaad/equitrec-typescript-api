@@ -1,5 +1,5 @@
 import { pool } from '../config/database';
-import { Competition, CreateCompetitionRequest, UpdateCompetitionRequest, CreateCompetitionResponse, CompetitionWithJudges, JugeAssignment } from '../models/Competition';
+import { Competition, CreateCompetitionRequest, UpdateCompetitionRequest, CreateCompetitionResponse, CompetitionWithJudges, JugeAssignment, CompetitionWithEpreuves, EpreuveInCompetition } from '../models/Competition';
 
 export class CompetitionService {
 
@@ -236,6 +236,7 @@ export class CompetitionService {
             
             await client.query('DELETE FROM juger WHERE idcompetition = $1', [id]);
             await client.query('DELETE FROM participer WHERE idcompetition = $1', [id]);
+            await client.query('DELETE FROM composer WHERE idcompetition = $1', [id]);
             await client.query('DELETE FROM competition WHERE idcompetition = $1', [id]);
             
             await client.query('COMMIT');
@@ -282,6 +283,78 @@ export class CompetitionService {
             }
         } catch (error) {
             console.error('Erreur lors du retrait du juge:', error);
+            throw error;
+        }
+    }
+
+    static async getCompetitionWithEpreuves(id: number): Promise<CompetitionWithEpreuves> {
+        try {
+            const competition = await this.getCompetitionById(id);
+            
+            const epreuvesQuery = `
+                SELECT e.idepreuve, e.titre, e.description, e.idjuge,
+                       j.nomjuge, j.prenomjuge
+                FROM composer c
+                JOIN epreuve e ON c.idepreuve = e.idepreuve
+                LEFT JOIN juge j ON e.idjuge = j.idjuge
+                WHERE c.idcompetition = $1
+                ORDER BY e.titre
+            `;
+            
+            const epreuvesResult = await pool.query(epreuvesQuery, [id]);
+            const epreuves: EpreuveInCompetition[] = epreuvesResult.rows.map(row => ({
+                idepreuve: row.idepreuve,
+                titre: row.titre,
+                description: row.description,
+                idjuge: row.idjuge,
+                nomjuge: row.nomjuge,
+                prenomjuge: row.prenomjuge
+            }));
+
+            return {
+                ...competition,
+                epreuves
+            };
+        } catch (error) {
+            console.error('Erreur lors de la récupération de la compétition avec épreuves:', error);
+            throw error;
+        }
+    }
+
+    static async addEpreuveToCompetition(competitionId: number, epreuveId: number): Promise<void> {
+        try {
+            await this.getCompetitionById(competitionId);
+
+            const epreuveCheckQuery = 'SELECT idepreuve FROM epreuve WHERE idepreuve = $1';
+            const epreuveCheckResult = await pool.query(epreuveCheckQuery, [epreuveId]);
+            if (epreuveCheckResult.rows.length === 0) {
+                throw new Error('L\'épreuve spécifiée n\'existe pas');
+            }
+
+            const existingQuery = 'SELECT * FROM composer WHERE idcompetition = $1 AND idepreuve = $2';
+            const existingResult = await pool.query(existingQuery, [competitionId, epreuveId]);
+            if (existingResult.rows.length > 0) {
+                throw new Error('Cette épreuve est déjà assignée à cette compétition');
+            }
+
+            const insertQuery = 'INSERT INTO composer (idcompetition, idepreuve) VALUES ($1, $2)';
+            await pool.query(insertQuery, [competitionId, epreuveId]);
+        } catch (error) {
+            console.error('Erreur lors de l\'assignation de l\'épreuve:', error);
+            throw error;
+        }
+    }
+
+    static async removeEpreuveFromCompetition(competitionId: number, epreuveId: number): Promise<void> {
+        try {
+            const deleteQuery = 'DELETE FROM composer WHERE idcompetition = $1 AND idepreuve = $2';
+            const result = await pool.query(deleteQuery, [competitionId, epreuveId]);
+            
+            if (result.rowCount === 0) {
+                throw new Error('Assignation non trouvée');
+            }
+        } catch (error) {
+            console.error('Erreur lors du retrait de l\'épreuve:', error);
             throw error;
         }
     }
