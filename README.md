@@ -343,6 +343,23 @@ Création d'un nouveau club
 }
 ```
 
+#### DELETE `/clubs/:id`
+Suppression d'un club
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Club supprimé avec succès"
+}
+```
+
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les cavaliers liés au club.
+
 ---
 
 ### Routes Cavaliers

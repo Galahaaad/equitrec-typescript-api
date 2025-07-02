@@ -59,4 +59,22 @@ export class ClubService {
             throw error;
         }
     }
+
+    static async deleteClub(id: number): Promise<void> {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+            await this.getClubById(id);
+            await client.query('DELETE FROM cavalier WHERE idclub = $1', [id]);
+            await client.query('DELETE FROM club WHERE idclub = $1', [id]);
+            
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('Erreur lors de la suppression du club:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
 }

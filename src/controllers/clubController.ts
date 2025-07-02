@@ -104,4 +104,41 @@ export class ClubController {
             });
         }
     }
+
+    static async deleteClub(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const clubId = parseInt(id);
+
+            if (isNaN(clubId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du club invalide'
+                });
+                return;
+            }
+
+            await ClubService.deleteClub(clubId);
+
+            res.status(200).json({
+                success: true,
+                message: 'Club supprimé avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans deleteClub:', error);
+
+            if (error.message === 'Club non trouvé') {
+                res.status(404).json({
+                    success: false,
+                    message: 'Club non trouvé'
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la suppression du club'
+            });
+        }
+    }
 }
