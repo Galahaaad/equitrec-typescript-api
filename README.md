@@ -18,6 +18,7 @@ API REST pour la gestion des compétitions équestres avec système de notation,
   - [Caractéristiques](#routes-caractéristiques)
   - [Matériaux](#routes-matériaux)
   - [Niveaux](#routes-niveaux)
+  - [Critères](#routes-critères)
   - [QR Code Authentication](#routes-qr-code)
   - [Utilitaires](#routes-utilitaires)
 - [Codes d'erreur](#codes-derreur)
@@ -1206,6 +1207,138 @@ Suppression d'un niveau
 ```
 
 **⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans la table `participer`.
+
+---
+
+### Routes Critères
+
+#### GET `/criteres`
+Liste tous les critères d'évaluation
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "idcritere": 1,
+      "libelle": "Technique",
+      "idniveau": 1,
+      "libelleniveau": "Débutant",
+      "descriptionniveau": "Niveau débutant pour cavaliers novices"
+    },
+    {
+      "idcritere": 2,
+      "libelle": "Style",
+      "idniveau": 2,
+      "libelleniveau": "Intermédiaire",
+      "descriptionniveau": "Niveau intermédiaire pour cavaliers confirmés"
+    }
+  ],
+  "message": "Critères récupérés avec succès"
+}
+```
+
+#### GET `/criteres/:id`
+Récupère un critère par ID
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idcritere": 1,
+    "libelle": "Technique",
+    "idniveau": 1,
+    "libelleniveau": "Débutant",
+    "descriptionniveau": "Niveau débutant pour cavaliers novices"
+  },
+  "message": "Critère récupéré avec succès"
+}
+```
+
+#### POST `/criteres/create`
+Création d'un nouveau critère d'évaluation
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Body :**
+```json
+{
+  "libelle": "Précision",
+  "idniveau": 1
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idcritere": 3,
+    "libelle": "Précision",
+    "idniveau": 1
+  },
+  "message": "Critère créé avec succès"
+}
+```
+
+**Validation :**
+- `libelle` : requis, unique, max 100 caractères
+- `idniveau` : requis, doit correspondre à un niveau existant
+
+#### PUT `/criteres/:id`
+Mise à jour d'un critère
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)  
+**Body :** (tous les champs optionnels)
+```json
+{
+  "libelle": "Technique avancée",
+  "idniveau": 2
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idcritere": 1,
+    "libelle": "Technique avancée",
+    "idniveau": 2,
+    "libelleniveau": "Intermédiaire",
+    "descriptionniveau": "Niveau intermédiaire pour cavaliers confirmés"
+  },
+  "message": "Critère mis à jour avec succès"
+}
+```
+
+#### DELETE `/criteres/:id`
+Suppression d'un critère
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Critère supprimé avec succès"
+}
+```
+
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans la table `detenir`.
 
 ---
 
