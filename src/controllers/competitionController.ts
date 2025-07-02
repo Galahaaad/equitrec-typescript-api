@@ -323,6 +323,39 @@ export class CompetitionController {
         }
     }
 
+    static async getCompetitionWithCavaliers(req: Request, res: Response): Promise<void> {
+        try {
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID invalide'
+                });
+                return;
+            }
+
+            const competition = await CompetitionService.getCompetitionWithCavaliers(id);
+            res.json({
+                success: true,
+                data: competition,
+                message: 'Compétition avec cavaliers récupérée avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération de la compétition avec cavaliers:', error);
+            if (error instanceof Error && error.message === 'Compétition non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors de la récupération de la compétition avec cavaliers'
+                });
+            }
+        }
+    }
+
     static async addEpreuveToCompetition(req: Request, res: Response): Promise<void> {
         try {
             const competitionId = parseInt(req.params.id);

@@ -62,3 +62,24 @@ export interface EpreuveInCompetition {
     nomjuge?: string;
     prenomjuge?: string;
 }
+
+export interface CompetitionWithCavaliers {
+    idcompetition: number;
+    nomcompetition?: string;
+    datecompetition: Date;
+    idutilisateur: number;
+    nomutilisateur?: string;
+    prenomutilisateur?: string;
+    cavaliers: CavalierInCompetition[];
+}
+
+export interface CavalierInCompetition {
+    idcavalier: number;
+    nomcavalier: string;
+    prenomcavalier: string;
+    numerodossard: number;
+    idclub: number;
+    nomclub: string;
+    idniveau: number;
+    libelleniveau: string;
+}

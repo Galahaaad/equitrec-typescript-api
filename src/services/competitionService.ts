@@ -1,5 +1,5 @@
 import { pool } from '../config/database';
-import { Competition, CreateCompetitionRequest, UpdateCompetitionRequest, CreateCompetitionResponse, CompetitionWithJudges, JugeAssignment, CompetitionWithEpreuves, EpreuveInCompetition } from '../models/Competition';
+import { Competition, CreateCompetitionRequest, UpdateCompetitionRequest, CreateCompetitionResponse, CompetitionWithJudges, JugeAssignment, CompetitionWithEpreuves, EpreuveInCompetition, CompetitionWithCavaliers, CavalierInCompetition } from '../models/Competition';
 
 export class CompetitionService {
 
@@ -355,6 +355,43 @@ export class CompetitionService {
             }
         } catch (error) {
             console.error('Erreur lors du retrait de l\'épreuve:', error);
+            throw error;
+        }
+    }
+
+    static async getCompetitionWithCavaliers(id: number): Promise<CompetitionWithCavaliers> {
+        try {
+            const competition = await this.getCompetitionById(id);
+            
+            const cavaliersQuery = `
+                SELECT c.idcavalier, c.nomcavalier, c.prenomcavalier, c.numerodossard, c.idclub,
+                       cl.nomclub, p.idniveau, n.libelle as libelleniveau
+                FROM participer p
+                JOIN cavalier c ON p.idcavalier = c.idcavalier
+                JOIN club cl ON c.idclub = cl.idclub
+                JOIN niveau n ON p.idniveau = n.idniveau
+                WHERE p.idcompetition = $1
+                ORDER BY c.nomcavalier, c.prenomcavalier
+            `;
+            
+            const cavaliersResult = await pool.query(cavaliersQuery, [id]);
+            const cavaliers: CavalierInCompetition[] = cavaliersResult.rows.map(row => ({
+                idcavalier: row.idcavalier,
+                nomcavalier: row.nomcavalier,
+                prenomcavalier: row.prenomcavalier,
+                numerodossard: row.numerodossard,
+                idclub: row.idclub,
+                nomclub: row.nomclub,
+                idniveau: row.idniveau,
+                libelleniveau: row.libelleniveau
+            }));
+
+            return {
+                ...competition,
+                cavaliers
+            };
+        } catch (error) {
+            console.error('Erreur lors de la récupération de la compétition avec cavaliers:', error);
             throw error;
         }
     }

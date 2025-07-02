@@ -11,6 +11,7 @@ router.get('/date/:date', authenticateToken, CompetitionController.getCompetitio
 router.get('/:id', authenticateToken, CompetitionController.getCompetitionById);
 router.get('/:id/judges', authenticateToken, CompetitionController.getCompetitionWithJudges);
 router.get('/:id/epreuves', authenticateToken, CompetitionController.getCompetitionWithEpreuves);
+router.get('/:id/cavaliers', authenticateToken, CompetitionController.getCompetitionWithCavaliers);
 
 // Routes d'administration (SUPER_ADMIN uniquement)
 router.post('/create', authenticateToken, requireSuperAdmin, CompetitionController.createCompetition);
