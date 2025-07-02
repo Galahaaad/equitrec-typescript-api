@@ -17,6 +17,7 @@ API REST pour la gestion des compétitions équestres avec système de notation,
   - [Juges](#routes-juges)
   - [Caractéristiques](#routes-caractéristiques)
   - [Matériaux](#routes-matériaux)
+  - [Niveaux](#routes-niveaux)
   - [QR Code Authentication](#routes-qr-code)
   - [Utilitaires](#routes-utilitaires)
 - [Codes d'erreur](#codes-derreur)
@@ -1081,6 +1082,130 @@ Retirer un matériel d'une épreuve
   "message": "Matériel retiré de l'épreuve avec succès"
 }
 ```
+
+---
+
+### Routes Niveaux
+
+#### GET `/niveaux`
+Liste tous les niveaux
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "idniveau": 1,
+      "libelle": "Débutant",
+      "description": "Niveau débutant pour cavaliers novices"
+    },
+    {
+      "idniveau": 2,
+      "libelle": "Intermédiaire",
+      "description": "Niveau intermédiaire pour cavaliers confirmés"
+    }
+  ],
+  "message": "Niveaux récupérés avec succès"
+}
+```
+
+#### GET `/niveaux/:id`
+Récupère un niveau par ID
+
+**Pré-requis :** Token JWT valide  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idniveau": 1,
+    "libelle": "Débutant",
+    "description": "Niveau débutant pour cavaliers novices"
+  },
+  "message": "Niveau récupéré avec succès"
+}
+```
+
+#### POST `/niveaux/create`
+Création d'un nouveau niveau
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Body :**
+```json
+{
+  "libelle": "Expert",
+  "description": "Niveau expert pour cavaliers professionnels"
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idniveau": 3,
+    "libelle": "Expert",
+    "description": "Niveau expert pour cavaliers professionnels"
+  },
+  "message": "Niveau créé avec succès"
+}
+```
+
+**Validation :**
+- `libelle` : requis, unique, max 50 caractères
+- `description` : requise, max 255 caractères
+
+#### PUT `/niveaux/:id`
+Mise à jour d'un niveau
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)  
+**Body :** (tous les champs optionnels)
+```json
+{
+  "libelle": "Débutant+",
+  "description": "Niveau débutant amélioré"
+}
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "idniveau": 1,
+    "libelle": "Débutant+",
+    "description": "Niveau débutant amélioré"
+  },
+  "message": "Niveau mis à jour avec succès"
+}
+```
+
+#### DELETE `/niveaux/:id`
+Suppression d'un niveau
+
+**Pré-requis :** Token JWT + Rôle SUPER_ADMIN  
+**Headers :** `Authorization: Bearer <token>`  
+**Paramètres :** `id` (number)
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "message": "Niveau supprimé avec succès"
+}
+```
+
+**⚠️ Note :** La suppression utilise une transaction pour nettoyer les références dans la table `participer`.
 
 ---
 

@@ -10,6 +10,7 @@ import jugeRoutes from './judges';
 import qrRoutes from './qr';
 import caracteristiqueRoutes from './caracteristiques';
 import materielRoutes from './materiaux';
+import niveauRoutes from './niveaux';
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ router.use('/judges', jugeRoutes);
 router.use('/qr', qrRoutes);
 router.use('/caracteristiques', caracteristiqueRoutes);
 router.use('/materiaux', materielRoutes);
+router.use('/niveaux', niveauRoutes);
 
 router.get('/health', async (req, res) => {
     try {
