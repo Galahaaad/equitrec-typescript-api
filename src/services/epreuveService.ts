@@ -230,12 +230,37 @@ export class EpreuveService {
 
     static async addCompetitionToEpreuve(epreuveId: number, competitionId: number): Promise<void> {
         try {
-            await this.getEpreuveById(epreuveId);
+            // Vérifier que l'épreuve existe et récupérer son juge
+            const epreuve = await this.getEpreuveById(epreuveId);
 
             const competitionCheckQuery = 'SELECT idcompetition FROM competition WHERE idcompetition = $1';
             const competitionCheckResult = await pool.query(competitionCheckQuery, [competitionId]);
             if (competitionCheckResult.rows.length === 0) {
                 throw new Error('La compétition spécifiée n\'existe pas');
+            }
+
+            // VALIDATION MÉTIER : Vérifier que le juge de l'épreuve est assigné à cette compétition
+            if (epreuve.idjuge) {
+                const judgeAssignmentQuery = 'SELECT 1 FROM juger WHERE idjuge = $1 AND idcompetition = $2';
+                const judgeAssignmentResult = await pool.query(judgeAssignmentQuery, [epreuve.idjuge, competitionId]);
+                
+                if (judgeAssignmentResult.rows.length === 0) {
+                    throw new Error('Le juge de cette épreuve n\'est pas assigné à cette compétition. Veuillez d\'abord assigner le juge à la compétition.');
+                }
+
+                // VALIDATION CONFLIT D'HORAIRES : Vérifier qu'un juge n'a pas déjà une épreuve dans cette compétition
+                const judgeConflictQuery = `
+                    SELECT e.titre, e.idepreuve 
+                    FROM composer c
+                    JOIN epreuve e ON c.idepreuve = e.idepreuve
+                    WHERE c.idcompetition = $1 AND e.idjuge = $2 AND e.idepreuve != $3
+                `;
+                const judgeConflictResult = await pool.query(judgeConflictQuery, [competitionId, epreuve.idjuge, epreuveId]);
+                
+                if (judgeConflictResult.rows.length > 0) {
+                    const conflictingEpreuve = judgeConflictResult.rows[0];
+                    throw new Error(`Conflit d'horaires: Le juge a déjà l'épreuve "${conflictingEpreuve.titre}" (ID: ${conflictingEpreuve.idepreuve}) dans cette compétition. Un juge ne peut avoir qu'une seule épreuve par compétition.`);
+                }
             }
 
             const existingQuery = 'SELECT * FROM composer WHERE idcompetition = $1 AND idepreuve = $2';
