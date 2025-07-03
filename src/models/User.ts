@@ -32,6 +32,15 @@ export interface CreateUserData {
     idrole: number;
 }
 
+export interface UpdateUserRequest {
+    nomutilisateur?: string;
+    prenomutilisateur?: string;
+    email?: string;
+    username?: string;
+    idjuge?: number | null;
+    idrole?: number;
+}
+
 export class UserModel {
     private pool: Pool;
 
