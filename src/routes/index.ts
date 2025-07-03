@@ -12,6 +12,7 @@ import caracteristiqueRoutes from './caracteristiques';
 import materielRoutes from './materiaux';
 import niveauRoutes from './niveaux';
 import critereRoutes from './criteres';
+import categorieRoutes from './categories';
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ router.use('/caracteristiques', caracteristiqueRoutes);
 router.use('/materiaux', materielRoutes);
 router.use('/niveaux', niveauRoutes);
 router.use('/criteres', critereRoutes);
+router.use('/categories', categorieRoutes);
 
 router.get('/health', async (req, res) => {
     try {
