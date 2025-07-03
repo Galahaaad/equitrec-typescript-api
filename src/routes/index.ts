@@ -13,6 +13,7 @@ import materielRoutes from './materiaux';
 import niveauRoutes from './niveaux';
 import critereRoutes from './criteres';
 import categorieRoutes from './categories';
+import userRoutes from './users';
 
 const router = express.Router();
 
@@ -29,6 +30,7 @@ router.use('/materiaux', materielRoutes);
 router.use('/niveaux', niveauRoutes);
 router.use('/criteres', critereRoutes);
 router.use('/categories', categorieRoutes);
+router.use('/users', userRoutes);
 
 router.get('/health', async (req, res) => {
     try {
