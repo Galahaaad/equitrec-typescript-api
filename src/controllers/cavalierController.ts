@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { CavalierService } from '../services/cavalierService';
+import { ParticipationService } from '../services/participationService';
 import { AuthenticatedRequest } from '../types';
 
 export class CavalierController {
@@ -237,6 +238,196 @@ export class CavalierController {
             res.status(500).json({
                 success: false,
                 message: 'Erreur lors de la suppression du cavalier'
+            });
+        }
+    }
+
+    static async getParticipationsByCavalier(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const cavalierId = parseInt(id);
+
+            if (isNaN(cavalierId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du cavalier invalide'
+                });
+                return;
+            }
+
+            const participations = await ParticipationService.getParticipationsByCavalier(cavalierId);
+
+            res.status(200).json({
+                success: true,
+                data: participations,
+                message: 'Participations du cavalier récupérées avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans getParticipationsByCavalier:', error);
+
+            if (error.message === 'Cavalier non trouvé') {
+                res.status(404).json({
+                    success: false,
+                    message: 'Cavalier non trouvé'
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la récupération des participations'
+            });
+        }
+    }
+
+    static async inscrireCavalierCompetition(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const { idcompetition, idniveau } = req.body;
+            const { id } = req.params;
+            const idcavalier = parseInt(id);
+
+            if (isNaN(idcavalier)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du cavalier invalide'
+                });
+                return;
+            }
+
+            if (!idcompetition || !idniveau) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de compétition et ID de niveau sont requis'
+                });
+                return;
+            }
+
+            const participation = await ParticipationService.inscrireCavalierCompetition({
+                idcavalier,
+                idcompetition,
+                idniveau
+            });
+
+            res.status(201).json({
+                success: true,
+                data: participation,
+                message: 'Cavalier inscrit à la compétition avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans inscrireCavalierCompetition:', error);
+
+            if (error.message === 'Cavalier non trouvé' ||
+                error.message === 'Compétition non trouvée' ||
+                error.message === 'Niveau non trouvé') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+                return;
+            }
+
+            if (error.message === 'Ce cavalier est déjà inscrit à cette compétition') {
+                res.status(409).json({
+                    success: false,
+                    message: error.message
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de l\'inscription du cavalier'
+            });
+        }
+    }
+
+    static async retirerParticipationCavalier(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const { id, competitionId } = req.params;
+            const idcavalier = parseInt(id);
+            const idcompetition = parseInt(competitionId);
+
+            if (isNaN(idcavalier) || isNaN(idcompetition)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du cavalier ou de la compétition invalide'
+                });
+                return;
+            }
+
+            await ParticipationService.retirerParticipation(idcavalier, idcompetition);
+
+            res.status(200).json({
+                success: true,
+                message: 'Participation retirée avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans retirerParticipationCavalier:', error);
+
+            if (error.message === 'Participation non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: 'Participation non trouvée'
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors du retrait de la participation'
+            });
+        }
+    }
+
+    static async changerNiveauParticipationCavalier(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const { id, competitionId } = req.params;
+            const { idniveau } = req.body;
+            const idcavalier = parseInt(id);
+            const idcompetition = parseInt(competitionId);
+
+            if (isNaN(idcavalier) || isNaN(idcompetition)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du cavalier ou de la compétition invalide'
+                });
+                return;
+            }
+
+            if (!idniveau) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID du nouveau niveau requis'
+                });
+                return;
+            }
+
+            const participation = await ParticipationService.changerNiveauParticipation(
+                idcavalier,
+                idcompetition,
+                idniveau
+            );
+
+            res.status(200).json({
+                success: true,
+                data: participation,
+                message: 'Niveau de participation modifié avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans changerNiveauParticipationCavalier:', error);
+
+            if (error.message === 'Participation non trouvée' ||
+                error.message === 'Nouveau niveau non trouvé') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors du changement de niveau'
             });
         }
     }

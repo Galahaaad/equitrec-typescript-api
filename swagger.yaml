@@ -228,6 +228,119 @@ components:
         notefinal:
           type: number
           format: float
+    
+    Participation:
+      type: object
+      properties:
+        idcavalier:
+          type: integer
+        idcompetition:
+          type: integer
+        idniveau:
+          type: integer
+        dateinscription:
+          type: string
+          format: date-time
+          nullable: true
+    
+    ParticipationComplete:
+      type: object
+      properties:
+        idcavalier:
+          type: integer
+        idcompetition:
+          type: integer
+        idniveau:
+          type: integer
+        dateinscription:
+          type: string
+          format: date-time
+          nullable: true
+        nomcavalier:
+          type: string
+        prenomcavalier:
+          type: string
+        numerodossard:
+          type: integer
+        idclub:
+          type: integer
+        nomclub:
+          type: string
+        nomcompetition:
+          type: string
+        datecompetition:
+          type: string
+          format: date-time
+        libelleniveau:
+          type: string
+    
+    ParticipationsByCavalier:
+      type: object
+      properties:
+        idcavalier:
+          type: integer
+        nomcavalier:
+          type: string
+        prenomcavalier:
+          type: string
+        numerodossard:
+          type: integer
+        participations:
+          type: array
+          items:
+            type: object
+            properties:
+              idcompetition:
+                type: integer
+              nomcompetition:
+                type: string
+              datecompetition:
+                type: string
+                format: date-time
+              idniveau:
+                type: integer
+              libelleniveau:
+                type: string
+              dateinscription:
+                type: string
+                format: date-time
+                nullable: true
+    
+    ParticipationsByCompetition:
+      type: object
+      properties:
+        idcompetition:
+          type: integer
+        nomcompetition:
+          type: string
+        datecompetition:
+          type: string
+          format: date-time
+        participations:
+          type: array
+          items:
+            type: object
+            properties:
+              idcavalier:
+                type: integer
+              nomcavalier:
+                type: string
+              prenomcavalier:
+                type: string
+              numerodossard:
+                type: integer
+              idclub:
+                type: integer
+              nomclub:
+                type: string
+              idniveau:
+                type: integer
+              libelleniveau:
+                type: string
+              dateinscription:
+                type: string
+                format: date-time
+                nullable: true
 
 paths:
   /:
@@ -597,6 +710,158 @@ paths:
           description: Cavalier créé avec succès
         '409':
           description: Numéro de dossard déjà utilisé
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+
+  /cavaliers/{id}/participations:
+    get:
+      summary: Participations d'un cavalier
+      description: Récupérer toutes les participations d'un cavalier
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Participations du cavalier récupérées
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ParticipationsByCavalier'
+        '404':
+          description: Cavalier non trouvé
+    post:
+      summary: Inscrire un cavalier à une compétition
+      description: Inscrire un cavalier à une compétition avec un niveau (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - idcompetition
+                - idniveau
+              properties:
+                idcompetition:
+                  type: integer
+                  description: ID de la compétition
+                idniveau:
+                  type: integer
+                  description: ID du niveau de participation
+            examples:
+              exemple:
+                value:
+                  idcompetition: 1
+                  idniveau: 2
+      responses:
+        '201':
+          description: Cavalier inscrit avec succès
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Participation'
+        '404':
+          description: Cavalier, compétition ou niveau non trouvé
+        '409':
+          description: Cavalier déjà inscrit à cette compétition
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+
+  /cavaliers/{id}/participations/{competitionId}:
+    delete:
+      summary: Retirer une participation
+      description: Retirer un cavalier d'une compétition (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Participation retirée avec succès
+        '404':
+          description: Participation non trouvée
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+
+  /cavaliers/{id}/participations/{competitionId}/niveau:
+    put:
+      summary: Changer le niveau de participation
+      description: Modifier le niveau d'un cavalier pour une compétition (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - idniveau
+              properties:
+                idniveau:
+                  type: integer
+                  description: Nouveau ID du niveau
+            examples:
+              exemple:
+                value:
+                  idniveau: 3
+      responses:
+        '200':
+          description: Niveau modifié avec succès
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Participation'
+        '404':
+          description: Participation ou niveau non trouvé
         '403':
           description: Accès interdit (SUPER_ADMIN requis)
 
@@ -1182,6 +1447,33 @@ paths:
           description: Juge retiré avec succès
         '403':
           description: Accès interdit (SUPER_ADMIN requis)
+
+  /competitions/{id}/participations:
+    get:
+      summary: Participations d'une compétition
+      description: Récupérer toutes les participations (cavaliers inscrits) d'une compétition
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Participations de la compétition récupérées
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ParticipationsByCompetition'
+        '404':
+          description: Compétition non trouvée
 
   # === JUGES ===
   /judges:
@@ -2080,3 +2372,5 @@ tags:
     description: Gestion des critères d'évaluation
   - name: Catégories
     description: Gestion des catégories de notation
+  - name: Participations
+    description: Gestion des inscriptions cavaliers-compétitions

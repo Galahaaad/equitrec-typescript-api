@@ -26,4 +26,7 @@ router.delete('/:competitionId/judges/:judgeId', authenticateToken, requireSuper
 router.post('/:id/assign-epreuve', authenticateToken, requireSuperAdmin, CompetitionController.addEpreuveToCompetition);
 router.delete('/:competitionId/epreuves/:epreuveId', authenticateToken, requireSuperAdmin, CompetitionController.removeEpreuveFromCompetition);
 
+// Gestion des participations
+router.get('/:id/participations', authenticateToken, CompetitionController.getParticipationsByCompetition);
+
 export default router;

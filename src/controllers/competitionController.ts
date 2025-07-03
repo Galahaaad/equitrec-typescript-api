@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { CompetitionService } from '../services/competitionService';
+import { ParticipationService } from '../services/participationService';
 
 export class CompetitionController {
 
@@ -432,6 +433,45 @@ export class CompetitionController {
                     message: 'Erreur lors du retrait de l\'épreuve'
                 });
             }
+        }
+    }
+
+    // Méthodes pour la gestion des participations
+    static async getParticipationsByCompetition(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const competitionId = parseInt(id);
+
+            if (isNaN(competitionId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de compétition invalide'
+                });
+                return;
+            }
+
+            const participations = await ParticipationService.getParticipationsByCompetition(competitionId);
+
+            res.status(200).json({
+                success: true,
+                data: participations,
+                message: 'Participations de la compétition récupérées avec succès'
+            });
+        } catch (error: any) {
+            console.error('Erreur dans getParticipationsByCompetition:', error);
+
+            if (error.message === 'Compétition non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: 'Compétition non trouvée'
+                });
+                return;
+            }
+
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la récupération des participations'
+            });
         }
     }
 }
