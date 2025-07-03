@@ -46,7 +46,6 @@ export interface FicheInCategorie {
     titre?: string;
 }
 
-// Interfaces pour les opérations CRUD
 export interface AssignCategorieToFicheRequest {
     idcategorie: number;
 }

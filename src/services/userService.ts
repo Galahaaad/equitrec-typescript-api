@@ -17,7 +17,6 @@ export class UserService {
             `;
             const result = await pool.query(query);
             
-            // Ne pas retourner les mots de passe
             return result.rows.map(user => {
                 const { password, ...userResponse } = user;
                 return userResponse;
@@ -56,10 +55,8 @@ export class UserService {
 
     static async updateUser(id: number, userData: UpdateUserRequest): Promise<UserResponse> {
         try {
-            // Vérifier que l'utilisateur existe
             const existingUser = await this.getUserById(id);
 
-            // Vérifier l'unicité du username si modifié
             if (userData.username && userData.username !== existingUser.username) {
                 const usernameQuery = 'SELECT idutilisateur FROM utilisateur WHERE username = $1 AND idutilisateur != $2';
                 const usernameResult = await pool.query(usernameQuery, [userData.username, id]);
@@ -69,7 +66,6 @@ export class UserService {
                 }
             }
 
-            // Vérifier l'unicité de l'email si modifié
             if (userData.email && userData.email !== existingUser.email) {
                 const emailQuery = 'SELECT idutilisateur FROM utilisateur WHERE email = $1 AND idutilisateur != $2';
                 const emailResult = await pool.query(emailQuery, [userData.email, id]);
@@ -79,7 +75,6 @@ export class UserService {
                 }
             }
 
-            // Vérifier que le juge existe si spécifié
             if (userData.idjuge !== undefined && userData.idjuge !== null) {
                 const judgeQuery = 'SELECT idjuge FROM juge WHERE idjuge = $1';
                 const judgeResult = await pool.query(judgeQuery, [userData.idjuge]);
@@ -89,7 +84,6 @@ export class UserService {
                 }
             }
 
-            // Vérifier que le rôle existe si spécifié
             if (userData.idrole !== undefined) {
                 const roleQuery = 'SELECT idrole FROM role WHERE idrole = $1';
                 const roleResult = await pool.query(roleQuery, [userData.idrole]);
@@ -99,7 +93,6 @@ export class UserService {
                 }
             }
 
-            // Construire la requête de mise à jour dynamiquement
             const updateFields: string[] = [];
             const values: any[] = [];
             let paramIndex = 1;
@@ -161,7 +154,6 @@ export class UserService {
                 throw new Error('Aucune donnée à mettre à jour');
             }
 
-            // Ajouter l'ID en dernier paramètre
             values.push(id);
 
             const updateQuery = `
@@ -189,10 +181,8 @@ export class UserService {
         try {
             await client.query('BEGIN');
             
-            // Vérifier que l'utilisateur existe
             await this.getUserById(id);
 
-            // Supprimer l'utilisateur
             const deleteQuery = 'DELETE FROM utilisateur WHERE idutilisateur = $1';
             await client.query(deleteQuery, [id]);
             

@@ -165,17 +165,14 @@ export class CaracteristiqueService {
 
     static async assignCaracteristiqueToEpreuve(epreuveId: number, caracteristiqueId: number): Promise<void> {
         try {
-            // Vérifier que l'épreuve existe
             const epreuveCheckQuery = 'SELECT idepreuve FROM epreuve WHERE idepreuve = $1';
             const epreuveCheckResult = await pool.query(epreuveCheckQuery, [epreuveId]);
             if (epreuveCheckResult.rows.length === 0) {
                 throw new Error('L\'épreuve spécifiée n\'existe pas');
             }
 
-            // Vérifier que la caractéristique existe
             await this.getCaracteristiqueById(caracteristiqueId);
 
-            // Vérifier que l'association n'existe pas déjà
             const existingQuery = 'SELECT * FROM posseder WHERE idepreuve = $1 AND idcaracteristique = $2';
             const existingResult = await pool.query(existingQuery, [epreuveId, caracteristiqueId]);
             if (existingResult.rows.length > 0) {

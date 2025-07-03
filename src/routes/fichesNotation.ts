@@ -13,7 +13,6 @@ router.post('/create', authenticateToken, requireJudgeRole, FicheNotationControl
 router.put('/:id', authenticateToken, requireJudgeRole, FicheNotationController.updateFicheNotation);
 router.delete('/:id', authenticateToken, requireJudgeRole, FicheNotationController.deleteFicheNotation);
 
-// Gestion des catégories (SUPER_ADMIN uniquement)
 router.post('/:id/assign-categorie', authenticateToken, requireSuperAdmin, FicheNotationController.assignCategorieToFiche);
 router.delete('/:ficheId/categories/:categorieId', authenticateToken, requireSuperAdmin, FicheNotationController.removeCategorieFromFiche);
 

@@ -162,13 +162,9 @@ export class CategorieService {
         }
     }
 
-    // Méthodes pour la gestion des fiches de notation
     static async getCategorieWithFiches(id: number): Promise<CategorieWithFiches> {
         try {
-            // Récupérer la catégorie
             const categorie = await this.getCategorieById(id);
-
-            // Récupérer toutes les fiches associées à cette catégorie
             const fichesQuery = `
                 SELECT fn.idfichenotation, fn.cumulenote, fn.appreciation, fn.isvalidate, 
                        fn.idcavalier, fn.idepreuve, c.nomcavalier, c.prenomcavalier, 
@@ -199,10 +195,8 @@ export class CategorieService {
 
     static async getFichesByCategorie(categorieId: number): Promise<FicheInCategorie[]> {
         try {
-            // Vérifier que la catégorie existe
             await this.getCategorieById(categorieId);
 
-            // Récupérer toutes les fiches associées
             const query = `
                 SELECT fn.idfichenotation, fn.cumulenote, fn.appreciation, fn.isvalidate, 
                        fn.idcavalier, fn.idepreuve, c.nomcavalier, c.prenomcavalier, 
@@ -229,10 +223,8 @@ export class CategorieService {
         try {
             await client.query('BEGIN');
 
-            // Vérifier que la catégorie existe
             await this.getCategorieById(categorieId);
 
-            // Vérifier que la fiche existe
             const ficheQuery = 'SELECT idfichenotation FROM fichenotation WHERE idfichenotation = $1';
             const ficheResult = await client.query(ficheQuery, [ficheId]);
             
@@ -240,7 +232,6 @@ export class CategorieService {
                 throw new Error('La fiche de notation spécifiée n\'existe pas');
             }
 
-            // Vérifier que la relation n'existe pas déjà
             const existingQuery = 'SELECT 1 FROM contenir WHERE idfichenotation = $1 AND idcategorie = $2';
             const existingResult = await client.query(existingQuery, [ficheId, categorieId]);
             
@@ -248,7 +239,6 @@ export class CategorieService {
                 throw new Error('Cette fiche de notation est déjà assignée à cette catégorie');
             }
 
-            // Créer la relation
             const insertQuery = 'INSERT INTO contenir (idfichenotation, idcategorie) VALUES ($1, $2)';
             await client.query(insertQuery, [ficheId, categorieId]);
 

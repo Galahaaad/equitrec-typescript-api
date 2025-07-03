@@ -135,7 +135,6 @@ export class CritereController {
         }
     }
 
-    // Méthodes pour la gestion des épreuves
     static async getCritereWithEpreuves(req: Request, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id);

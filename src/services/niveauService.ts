@@ -59,7 +59,6 @@ export class NiveauService {
             const libelleTrimmed = niveauData.libelle.trim();
             const descriptionTrimmed = niveauData.description.trim();
 
-            // Vérifier l'unicité du libellé
             const checkQuery = 'SELECT idniveau FROM niveau WHERE LOWER(libelle) = LOWER($1)';
             const checkResult = await pool.query(checkQuery, [libelleTrimmed]);
             if (checkResult.rows.length > 0) {
@@ -97,7 +96,6 @@ export class NiveauService {
                     throw new Error('Le libellé doit contenir entre 1 et 50 caractères');
                 }
 
-                // Vérifier l'unicité du libellé (sauf pour le niveau actuel)
                 const checkQuery = 'SELECT idniveau FROM niveau WHERE LOWER(libelle) = LOWER($1) AND idniveau != $2';
                 const checkResult = await pool.query(checkQuery, [libelleTrimmed, id]);
                 if (checkResult.rows.length > 0) {
@@ -151,10 +149,8 @@ export class NiveauService {
             
             await this.getNiveauById(id);
             
-            // Supprimer les références dans la table participer (Romain je te détèste)
             await client.query('DELETE FROM participer WHERE idniveau = $1', [id]);
             
-            // Supprimer le niveau
             await client.query('DELETE FROM niveau WHERE idniveau = $1', [id]);
             
             await client.query('COMMIT');

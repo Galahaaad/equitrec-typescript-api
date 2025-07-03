@@ -133,22 +133,18 @@ export class MaterielService {
 
     static async assignMaterielToEpreuve(epreuveId: number, materielId: number, quantite: number): Promise<void> {
         try {
-            // Vérifier que l'épreuve existe
             const epreuveCheckQuery = 'SELECT idepreuve FROM epreuve WHERE idepreuve = $1';
             const epreuveCheckResult = await pool.query(epreuveCheckQuery, [epreuveId]);
             if (epreuveCheckResult.rows.length === 0) {
                 throw new Error('L\'épreuve spécifiée n\'existe pas');
             }
 
-            // Vérifier que le matériel existe
             await this.getMaterielById(materielId);
 
-            // Vérifier la quantité
             if (!quantite || quantite <= 0) {
                 throw new Error('La quantité doit être un nombre positif');
             }
 
-            // Vérifier que l'association n'existe pas déjà
             const existingQuery = 'SELECT * FROM avoir WHERE idepreuve = $1 AND idmateriel = $2';
             const existingResult = await pool.query(existingQuery, [epreuveId, materielId]);
             if (existingResult.rows.length > 0) {
@@ -165,7 +161,6 @@ export class MaterielService {
 
     static async updateMaterielQuantiteForEpreuve(epreuveId: number, materielId: number, quantite: number): Promise<void> {
         try {
-            // Vérifier la quantité
             if (!quantite || quantite <= 0) {
                 throw new Error('La quantité doit être un nombre positif');
             }

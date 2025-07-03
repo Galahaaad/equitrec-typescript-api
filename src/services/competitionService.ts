@@ -135,7 +135,6 @@ export class CompetitionService {
                 throw new Error('Format de date invalide');
             }
 
-            // Vérifier que l'utilisateur existe
             const userCheckQuery = 'SELECT idutilisateur FROM utilisateur WHERE idutilisateur = $1';
             const userCheckResult = await pool.query(userCheckQuery, [competitionData.idutilisateur]);
             if (userCheckResult.rows.length === 0) {
@@ -323,10 +322,8 @@ export class CompetitionService {
 
     static async addEpreuveToCompetition(competitionId: number, epreuveId: number): Promise<void> {
         try {
-            // Vérifier que la compétition existe
             await this.getCompetitionById(competitionId);
 
-            // Vérifier que l'épreuve existe et récupérer son juge
             const epreuveCheckQuery = 'SELECT idepreuve, idjuge FROM epreuve WHERE idepreuve = $1';
             const epreuveCheckResult = await pool.query(epreuveCheckQuery, [epreuveId]);
             if (epreuveCheckResult.rows.length === 0) {
@@ -336,7 +333,6 @@ export class CompetitionService {
             const epreuve = epreuveCheckResult.rows[0];
             const judgeId = epreuve.idjuge;
 
-            // VALIDATION MÉTIER : Vérifier que le juge de l'épreuve est assigné à cette compétition
             if (judgeId) {
                 const judgeAssignmentQuery = 'SELECT 1 FROM juger WHERE idjuge = $1 AND idcompetition = $2';
                 const judgeAssignmentResult = await pool.query(judgeAssignmentQuery, [judgeId, competitionId]);
@@ -345,7 +341,6 @@ export class CompetitionService {
                     throw new Error('Le juge de cette épreuve n\'est pas assigné à cette compétition. Veuillez d\'abord assigner le juge à la compétition.');
                 }
 
-                // VALIDATION CONFLIT D'HORAIRES : Vérifier qu'un juge n'a pas déjà une épreuve dans cette compétition
                 const judgeConflictQuery = `
                     SELECT e.titre, e.idepreuve 
                     FROM composer c
@@ -360,7 +355,6 @@ export class CompetitionService {
                 }
             }
 
-            // Vérifier que l'épreuve n'est pas déjà assignée à cette compétition
             const existingQuery = 'SELECT * FROM composer WHERE idcompetition = $1 AND idepreuve = $2';
             const existingResult = await pool.query(existingQuery, [competitionId, epreuveId]);
             if (existingResult.rows.length > 0) {

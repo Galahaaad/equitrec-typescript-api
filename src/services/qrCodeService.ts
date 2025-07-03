@@ -67,10 +67,8 @@ export class QRCodeService {
 
     static async generateQRCodeForJudge(request: GenerateQRRequest): Promise<GenerateQRResponse> {
         try {
-            // Vérifier que la compétition existe
             const competition = await CompetitionService.getCompetitionById(request.competitionId);
             
-            // Vérifier que le juge existe et est assigné à cette compétition
             const judgesInCompetition = await JugeService.getJugesByCompetition(request.competitionId);
             const assignedJudge = judgesInCompetition.find(j => j.idjuge === request.judgeId);
             
@@ -78,7 +76,6 @@ export class QRCodeService {
                 throw new Error('Ce juge n\'est pas assigné à cette compétition');
             }
 
-            // Vérifier que le juge a un compte utilisateur avec le rôle JUDGE
             const userQuery = `
                 SELECT u.* FROM utilisateur u 
                 WHERE u.idjuge = $1 AND u.idrole = 3
@@ -89,12 +86,10 @@ export class QRCodeService {
                 throw new Error('Ce juge n\'a pas de compte utilisateur avec le rôle JUDGE');
             }
 
-            // Calculer l'expiration : fin de la journée de compétition
             const competitionDate = new Date(competition.datecompetition);
             const expiresAt = new Date(competitionDate);
             expiresAt.setHours(23, 59, 59, 999); // Fin de journée
 
-            // Créer le payload JWT
             const payload: QRTokenPayload = {
                 judgeId: request.judgeId,
                 competitionId: request.competitionId,
@@ -104,11 +99,8 @@ export class QRCodeService {
                 qrAuth: true,
                 type: 'competition_qr'
             };
-
-            // Générer le token JWT
             const qrToken = jwt.sign(payload, config.jwt.secret);
 
-            // Données pour le QR Code (format JSON)
             const qrData = JSON.stringify({
                 token: qrToken,
                 competition: competition.idcompetition,
@@ -142,24 +134,19 @@ export class QRCodeService {
 
     static async validateQRCode(request: ValidateQRRequest): Promise<ValidateQRResponse> {
         try {
-            // Vérifier et décoder le token JWT
             const decoded = jwt.verify(request.qrToken, config.jwt.secret) as QRTokenPayload;
 
-            // Vérifications de sécurité
             if (!decoded.qrAuth || decoded.type !== 'competition_qr') {
                 throw new Error('Token QR invalide');
             }
 
-            // Vérifier que c'est bien le jour de la compétition
             const today = new Date().toISOString().split('T')[0];
             if (decoded.competitionDate !== today) {
                 throw new Error('Ce QR Code n\'est valide que le jour de la compétition');
             }
 
-            // Vérifier que la compétition existe toujours
             const competition = await CompetitionService.getCompetitionById(decoded.competitionId);
 
-            // Vérifier que le juge existe et est toujours assigné
             const judgesInCompetition = await JugeService.getJugesByCompetition(decoded.competitionId);
             const assignedJudge = judgesInCompetition.find(j => j.idjuge === decoded.judgeId);
             
@@ -167,7 +154,6 @@ export class QRCodeService {
                 throw new Error('Ce juge n\'est plus assigné à cette compétition');
             }
 
-            // Récupérer les informations complètes de l'utilisateur
             const userQuery = `
                 SELECT u.idutilisateur, u.nomutilisateur, u.prenomutilisateur, u.email,
                        u.username, u.idjuge, u.idrole 
@@ -182,7 +168,6 @@ export class QRCodeService {
 
             const user = userResult.rows[0];
 
-            // Générer un token JWT permanent pour la session
             const permanentTokenPayload = {
                 userId: user.idutilisateur,
                 judgeId: user.idjuge,
@@ -230,7 +215,6 @@ export class QRCodeService {
 
     static async generateBulkQRCodes(competitionId: number): Promise<GenerateQRResponse[]> {
         try {
-            // Récupérer tous les juges assignés à cette compétition qui peuvent avoir un QR
             const eligibleJudges = await JugeService.getJugesForQRGeneration(competitionId);
             
             const qrCodes: GenerateQRResponse[] = [];
@@ -245,7 +229,6 @@ export class QRCodeService {
                         qrCodes.push(qrResponse);
                     } catch (error) {
                         console.warn(`Impossible de générer QR pour juge ${judge.idjuge}:`, error);
-                        // Continue avec les autres juges
                     }
                 }
             }

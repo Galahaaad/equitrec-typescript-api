@@ -115,14 +115,12 @@ export class FicheNotationService {
 
             const appreciationTrimmed = ficheData.appreciation.trim();
 
-            // Vérifier que le cavalier existe
             const cavalierCheckQuery = 'SELECT idcavalier FROM cavalier WHERE idcavalier = $1';
             const cavalierCheckResult = await pool.query(cavalierCheckQuery, [ficheData.idcavalier]);
             if (cavalierCheckResult.rows.length === 0) {
                 throw new Error('Le cavalier spécifié n\'existe pas');
             }
 
-            // Vérifier que l'épreuve existe
             const epreuveCheckQuery = 'SELECT idepreuve FROM epreuve WHERE idepreuve = $1';
             const epreuveCheckResult = await pool.query(epreuveCheckQuery, [ficheData.idepreuve]);
             if (epreuveCheckResult.rows.length === 0) {
@@ -137,7 +135,7 @@ export class FicheNotationService {
             const insertResult = await pool.query(insertQuery, [
                 ficheData.cumulenote,
                 appreciationTrimmed,
-                ficheData.isvalidate || false, // Default false
+                ficheData.isvalidate || false,
                 ficheData.idcavalier,
                 ficheData.idepreuve
             ]);
@@ -239,7 +237,6 @@ export class FicheNotationService {
         try {
             await client.query('BEGIN');
             await this.getFicheNotationById(id);
-            // Les épreuves ne sont plus liées aux fiches de notation - pas besoin de cette ligne
             await client.query('DELETE FROM contenir WHERE idfichenotation = $1', [id]);
             await client.query('DELETE FROM fichenotation WHERE idfichenotation = $1', [id]);
             await client.query('COMMIT');
@@ -252,13 +249,10 @@ export class FicheNotationService {
         }
     }
 
-    // Méthodes pour la gestion des catégories
     static async getFicheNotationWithCategories(id: number): Promise<FicheNotationWithCategories> {
         try {
-            // Récupérer la fiche de notation
             const fiche = await this.getFicheNotationById(id);
 
-            // Récupérer toutes les catégories associées à cette fiche
             const categoriesQuery = `
                 SELECT c.idcategorie, c.libelle, c.notefinal
                 FROM contenir cont
@@ -294,10 +288,8 @@ export class FicheNotationService {
         try {
             await client.query('BEGIN');
 
-            // Vérifier que la fiche existe
             await this.getFicheNotationById(ficheId);
 
-            // Vérifier que la catégorie existe
             const categorieQuery = 'SELECT idcategorie FROM categorie WHERE idcategorie = $1';
             const categorieResult = await client.query(categorieQuery, [categorieId]);
             
@@ -305,7 +297,6 @@ export class FicheNotationService {
                 throw new Error('La catégorie spécifiée n\'existe pas');
             }
 
-            // Vérifier que la relation n'existe pas déjà
             const existingQuery = 'SELECT 1 FROM contenir WHERE idfichenotation = $1 AND idcategorie = $2';
             const existingResult = await client.query(existingQuery, [ficheId, categorieId]);
             
@@ -313,7 +304,6 @@ export class FicheNotationService {
                 throw new Error('Cette catégorie est déjà assignée à cette fiche de notation');
             }
 
-            // Créer la relation
             const insertQuery = 'INSERT INTO contenir (idfichenotation, idcategorie) VALUES ($1, $2)';
             await client.query(insertQuery, [ficheId, categorieId]);
 
@@ -332,10 +322,8 @@ export class FicheNotationService {
         try {
             await client.query('BEGIN');
 
-            // Vérifier que la fiche existe
             await this.getFicheNotationById(ficheId);
 
-            // Vérifier que la relation existe
             const existingQuery = 'SELECT 1 FROM contenir WHERE idfichenotation = $1 AND idcategorie = $2';
             const existingResult = await client.query(existingQuery, [ficheId, categorieId]);
             
@@ -343,7 +331,6 @@ export class FicheNotationService {
                 throw new Error('Cette catégorie n\'est pas assignée à cette fiche de notation');
             }
 
-            // Supprimer la relation
             const deleteQuery = 'DELETE FROM contenir WHERE idfichenotation = $1 AND idcategorie = $2';
             await client.query(deleteQuery, [ficheId, categorieId]);
 

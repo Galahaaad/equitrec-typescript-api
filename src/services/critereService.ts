@@ -59,14 +59,12 @@ export class CritereService {
 
             const libelleTrimmed = critereData.libelle.trim();
 
-            // Vérifier que le niveau existe
             const niveauQuery = 'SELECT idniveau FROM niveau WHERE idniveau = $1';
             const niveauResult = await pool.query(niveauQuery, [critereData.idniveau]);
             if (niveauResult.rows.length === 0) {
                 throw new Error('Le niveau spécifié n\'existe pas');
             }
 
-            // Vérifier l'unicité du libellé
             const checkQuery = 'SELECT idcritere FROM critere WHERE LOWER(libelle) = LOWER($1)';
             const checkResult = await pool.query(checkQuery, [libelleTrimmed]);
             if (checkResult.rows.length > 0) {
@@ -104,7 +102,6 @@ export class CritereService {
                     throw new Error('Le libellé doit contenir entre 1 et 100 caractères');
                 }
 
-                // Vérifier l'unicité du libellé (sauf pour le critère actuel)
                 const checkQuery = 'SELECT idcritere FROM critere WHERE LOWER(libelle) = LOWER($1) AND idcritere != $2';
                 const checkResult = await pool.query(checkQuery, [libelleTrimmed, id]);
                 if (checkResult.rows.length > 0) {
@@ -117,7 +114,6 @@ export class CritereService {
             }
 
             if (critereData.idniveau !== undefined) {
-                // Vérifier que le niveau existe
                 const niveauQuery = 'SELECT idniveau FROM niveau WHERE idniveau = $1';
                 const niveauResult = await pool.query(niveauQuery, [critereData.idniveau]);
                 if (niveauResult.rows.length === 0) {
@@ -161,10 +157,8 @@ export class CritereService {
             
             await this.getCritereById(id);
             
-            // Supprimer les références dans la table detenir (Critère ↔ Épreuve)
             await client.query('DELETE FROM detenir WHERE idcritere = $1', [id]);
             
-            // Supprimer le critère
             await client.query('DELETE FROM critere WHERE idcritere = $1', [id]);
             
             await client.query('COMMIT');
@@ -177,13 +171,10 @@ export class CritereService {
         }
     }
 
-    // Méthodes pour la gestion des épreuves
     static async getCritereWithEpreuves(id: number): Promise<CritereWithEpreuves> {
         try {
-            // Récupérer le critère
             const critere = await this.getCritereById(id);
 
-            // Récupérer toutes les épreuves associées à ce critère
             const epreuvesQuery = `
                 SELECT e.idepreuve, e.titre as nomepreuve, e.description, e.idjuge,
                        j.nomjuge, j.prenomjuge
@@ -213,10 +204,8 @@ export class CritereService {
 
     static async getEpreuvesByCritere(critereId: number): Promise<EpreuveInCritere[]> {
         try {
-            // Vérifier que le critère existe
             await this.getCritereById(critereId);
 
-            // Récupérer toutes les épreuves associées
             const query = `
                 SELECT e.idepreuve, e.titre as nomepreuve, e.description, e.idjuge,
                        j.nomjuge, j.prenomjuge
@@ -240,24 +229,20 @@ export class CritereService {
         try {
             await client.query('BEGIN');
 
-            // Vérifier que le critère existe
             await this.getCritereById(critereId);
 
-            // Vérifier que l'épreuve existe
             const epreuveCheckQuery = 'SELECT idepreuve FROM epreuve WHERE idepreuve = $1';
             const epreuveCheckResult = await client.query(epreuveCheckQuery, [epreuveId]);
             if (epreuveCheckResult.rows.length === 0) {
                 throw new Error('L\'épreuve spécifiée n\'existe pas');
             }
 
-            // Vérifier qu'il n'y a pas déjà une association
             const existingQuery = 'SELECT * FROM detenir WHERE idcritere = $1 AND idepreuve = $2';
             const existingResult = await client.query(existingQuery, [critereId, epreuveId]);
             if (existingResult.rows.length > 0) {
                 throw new Error('Cette épreuve est déjà assignée à ce critère');
             }
 
-            // Créer l'association
             const insertQuery = 'INSERT INTO detenir (idcritere, idepreuve) VALUES ($1, $2)';
             await client.query(insertQuery, [critereId, epreuveId]);
 

@@ -55,7 +55,6 @@ export class JugeService {
             const competitionsResult = await pool.query(competitionsQuery, [id]);
             const competitions: CompetitionAssignment[] = competitionsResult.rows;
 
-            // Vérifier si le juge a un compte utilisateur
             const userQuery = `
                 SELECT idutilisateur FROM utilisateur WHERE idjuge = $1
             `;
@@ -140,7 +139,6 @@ export class JugeService {
             const nomTrimmed = jugeData.nomjuge.trim();
             const prenomTrimmed = jugeData.prenomjuge.trim();
 
-            // Vérifier s'il n'existe pas déjà un juge avec le même nom/prénom
             const existingQuery = `
                 SELECT idjuge FROM juge 
                 WHERE LOWER(nomjuge) = LOWER($1) AND LOWER(prenomjuge) = LOWER($2)
@@ -196,7 +194,6 @@ export class JugeService {
                 throw new Error('Aucune donnée à mettre à jour');
             }
 
-            // Vérifier l'unicité si nom ou prénom modifié
             if (jugeData.nomjuge !== undefined || jugeData.prenomjuge !== undefined) {
                 const newNom = jugeData.nomjuge !== undefined ? jugeData.nomjuge.trim() : existingJuge.nomjuge;
                 const newPrenom = jugeData.prenomjuge !== undefined ? jugeData.prenomjuge.trim() : existingJuge.prenomjuge;

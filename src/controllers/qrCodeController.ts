@@ -93,8 +93,7 @@ export class QRCodeController {
             });
         } catch (error) {
             console.error('Erreur lors de la validation du QR Code:', error);
-            
-            // Gestion spécifique des erreurs d'authentification
+
             let statusCode = 400;
             let message = 'QR Code invalide';
             

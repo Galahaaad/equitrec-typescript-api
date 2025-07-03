@@ -19,7 +19,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Validation du format email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             res.status(400).json({

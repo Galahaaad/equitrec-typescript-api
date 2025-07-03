@@ -13,11 +13,9 @@ router.post('/create', authenticateToken, requireJudgeRole, EpreuveController.cr
 router.put('/:id', authenticateToken, requireJudgeRole, EpreuveController.updateEpreuve);
 router.delete('/:id', authenticateToken, requireJudgeRole, EpreuveController.deleteEpreuve);
 
-// Gestion des compétitions (SUPER_ADMIN uniquement)
 router.post('/:id/assign-competition', authenticateToken, requireSuperAdmin, EpreuveController.addCompetitionToEpreuve);
 router.delete('/:epreuveId/competitions/:competitionId', authenticateToken, requireSuperAdmin, EpreuveController.removeCompetitionFromEpreuve);
 
-// Gestion des critères (SUPER_ADMIN uniquement)
 router.post('/:id/assign-critere', authenticateToken, requireSuperAdmin, EpreuveController.assignCritereToEpreuve);
 router.delete('/:epreuveId/criteres/:critereId', authenticateToken, requireSuperAdmin, EpreuveController.removeCritereFromEpreuve);
 

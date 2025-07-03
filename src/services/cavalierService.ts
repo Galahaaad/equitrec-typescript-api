@@ -130,7 +130,6 @@ export class CavalierService {
             const existingCavalier = await this.getCavalierById(id);
 
             if (cavalierData.numerodossard !== undefined) {
-                // Vérifier l'unicité du dossard SEULEMENT si c'est différent de l'actuel
                 if (cavalierData.numerodossard !== existingCavalier.numerodossard) {
                     const dossardQuery = 'SELECT idcavalier FROM cavalier WHERE numerodossard = $1';
                     const dossardResult = await pool.query(dossardQuery, [cavalierData.numerodossard]);

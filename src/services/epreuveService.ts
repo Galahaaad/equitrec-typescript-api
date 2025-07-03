@@ -82,7 +82,6 @@ export class EpreuveService {
             const titreTrimmed = epreuveData.titre.trim();
             const descriptionTrimmed = epreuveData.description.trim();
 
-            // Vérifier que le juge existe
             const jugeCheckQuery = 'SELECT idjuge FROM juge WHERE idjuge = $1';
             const jugeCheckResult = await pool.query(jugeCheckQuery, [epreuveData.idjuge]);
             if (jugeCheckResult.rows.length === 0) {
@@ -230,7 +229,6 @@ export class EpreuveService {
 
     static async addCompetitionToEpreuve(epreuveId: number, competitionId: number): Promise<void> {
         try {
-            // Vérifier que l'épreuve existe et récupérer son juge
             const epreuve = await this.getEpreuveById(epreuveId);
 
             const competitionCheckQuery = 'SELECT idcompetition FROM competition WHERE idcompetition = $1';
@@ -239,7 +237,6 @@ export class EpreuveService {
                 throw new Error('La compétition spécifiée n\'existe pas');
             }
 
-            // VALIDATION MÉTIER : Vérifier que le juge de l'épreuve est assigné à cette compétition
             if (epreuve.idjuge) {
                 const judgeAssignmentQuery = 'SELECT 1 FROM juger WHERE idjuge = $1 AND idcompetition = $2';
                 const judgeAssignmentResult = await pool.query(judgeAssignmentQuery, [epreuve.idjuge, competitionId]);
@@ -248,7 +245,6 @@ export class EpreuveService {
                     throw new Error('Le juge de cette épreuve n\'est pas assigné à cette compétition. Veuillez d\'abord assigner le juge à la compétition.');
                 }
 
-                // VALIDATION CONFLIT D'HORAIRES : Vérifier qu'un juge n'a pas déjà une épreuve dans cette compétition
                 const judgeConflictQuery = `
                     SELECT e.titre, e.idepreuve 
                     FROM composer c
@@ -291,13 +287,10 @@ export class EpreuveService {
         }
     }
 
-    // Méthodes pour la gestion des critères
     static async getEpreuveWithCriteres(id: number): Promise<EpreuveWithCriteres> {
         try {
-            // Récupérer l'épreuve
             const epreuve = await this.getEpreuveById(id);
 
-            // Récupérer tous les critères associés à cette épreuve
             const criteresQuery = `
                 SELECT c.idcritere, c.libelle, c.description
                 FROM detenir d
@@ -329,24 +322,20 @@ export class EpreuveService {
         try {
             await client.query('BEGIN');
 
-            // Vérifier que l'épreuve existe
             await this.getEpreuveById(epreuveId);
 
-            // Vérifier que le critère existe
             const critereCheckQuery = 'SELECT idcritere FROM critere WHERE idcritere = $1';
             const critereCheckResult = await client.query(critereCheckQuery, [critereId]);
             if (critereCheckResult.rows.length === 0) {
                 throw new Error('Le critère spécifié n\'existe pas');
             }
 
-            // Vérifier qu'il n'y a pas déjà une association
             const existingQuery = 'SELECT * FROM detenir WHERE idepreuve = $1 AND idcritere = $2';
             const existingResult = await client.query(existingQuery, [epreuveId, critereId]);
             if (existingResult.rows.length > 0) {
                 throw new Error('Ce critère est déjà assigné à cette épreuve');
             }
 
-            // Créer l'association
             const insertQuery = 'INSERT INTO detenir (idepreuve, idcritere) VALUES ($1, $2)';
             await client.query(insertQuery, [epreuveId, critereId]);
 
@@ -365,14 +354,12 @@ export class EpreuveService {
         try {
             await client.query('BEGIN');
 
-            // Vérifier que l'association existe
             const checkQuery = 'SELECT * FROM detenir WHERE idepreuve = $1 AND idcritere = $2';
             const checkResult = await client.query(checkQuery, [epreuveId, critereId]);
             if (checkResult.rows.length === 0) {
                 throw new Error('Association critère-épreuve non trouvée');
             }
 
-            // Supprimer l'association
             const deleteQuery = 'DELETE FROM detenir WHERE idepreuve = $1 AND idcritere = $2';
             await client.query(deleteQuery, [epreuveId, critereId]);
 

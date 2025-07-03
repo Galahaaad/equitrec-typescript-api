@@ -187,7 +187,6 @@ export class FicheNotationController {
         }
     }
 
-    // Méthodes pour la gestion des catégories
     static async getFicheNotationWithCategories(req: Request, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id);

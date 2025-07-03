@@ -436,7 +436,6 @@ export class CompetitionController {
         }
     }
 
-    // Méthodes pour la gestion des participations
     static async getParticipationsByCompetition(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;

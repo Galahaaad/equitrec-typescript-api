@@ -27,7 +27,7 @@ export interface ValidateQRRequest {
 
 export interface ValidateQRResponse {
     success: boolean;
-    token: string; // JWT token permanent
+    token: string;
     user: {
         idutilisateur: number;
         nomutilisateur: string;

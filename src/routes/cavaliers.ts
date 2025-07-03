@@ -11,7 +11,6 @@ router.post('/create', authenticateToken, requireSuperAdmin, CavalierController.
 router.put('/:id', authenticateToken, requireSuperAdmin, CavalierController.updateCavalier);
 router.delete('/:id', authenticateToken, requireSuperAdmin, CavalierController.deleteCavalier);
 
-// Routes pour la gestion des participations
 router.get('/:id/participations', authenticateToken, CavalierController.getParticipationsByCavalier);
 router.post('/:id/participations', authenticateToken, requireSuperAdmin, CavalierController.inscrireCavalierCompetition);
 router.delete('/:id/participations/:competitionId', authenticateToken, requireSuperAdmin, CavalierController.retirerParticipationCavalier);
