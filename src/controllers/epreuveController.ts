@@ -272,4 +272,117 @@ export class EpreuveController {
             }
         }
     }
+
+    // Méthodes pour la gestion des critères
+    static async getEpreuveWithCriteres(req: Request, res: Response): Promise<void> {
+        try {
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID invalide'
+                });
+                return;
+            }
+
+            const epreuveWithCriteres = await EpreuveService.getEpreuveWithCriteres(id);
+            res.json({
+                success: true,
+                data: epreuveWithCriteres,
+                message: 'Épreuve avec critères récupérée avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération de l\'épreuve avec critères:', error);
+            if (error instanceof Error && error.message === 'Épreuve non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors de la récupération de l\'épreuve avec critères'
+                });
+            }
+        }
+    }
+
+    static async assignCritereToEpreuve(req: Request, res: Response): Promise<void> {
+        try {
+            const epreuveId = parseInt(req.params.id);
+            if (isNaN(epreuveId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID d\'épreuve invalide'
+                });
+                return;
+            }
+
+            const { idcritere } = req.body;
+            if (!idcritere || isNaN(parseInt(idcritere))) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de critère requis et valide'
+                });
+                return;
+            }
+
+            await EpreuveService.assignCritereToEpreuve(epreuveId, parseInt(idcritere));
+            res.json({
+                success: true,
+                message: 'Critère assigné à l\'épreuve avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de l\'assignation du critère:', error);
+            if (error instanceof Error && (
+                error.message === 'Épreuve non trouvée' ||
+                error.message === 'Le critère spécifié n\'existe pas' ||
+                error.message === 'Ce critère est déjà assigné à cette épreuve'
+            )) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors de l\'assignation du critère'
+                });
+            }
+        }
+    }
+
+    static async removeCritereFromEpreuve(req: Request, res: Response): Promise<void> {
+        try {
+            const epreuveId = parseInt(req.params.epreuveId);
+            const critereId = parseInt(req.params.critereId);
+
+            if (isNaN(epreuveId) || isNaN(critereId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'IDs d\'épreuve et critère requis et valides'
+                });
+                return;
+            }
+
+            await EpreuveService.removeCritereFromEpreuve(epreuveId, critereId);
+            res.json({
+                success: true,
+                message: 'Critère retiré de l\'épreuve avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors du retrait du critère:', error);
+            if (error instanceof Error && error.message === 'Association critère-épreuve non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors du retrait du critère'
+                });
+            }
+        }
+    }
 }
