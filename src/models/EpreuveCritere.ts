@@ -22,7 +22,7 @@ export interface CritereInEpreuve {
 export interface CritereWithEpreuves {
     idcritere: number;
     libelle: string;
-    description?: string;
+    idniveau: number;
     epreuves: EpreuveInCritere[];
 }
 

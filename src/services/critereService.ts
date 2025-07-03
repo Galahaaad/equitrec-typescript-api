@@ -200,7 +200,7 @@ export class CritereService {
             return {
                 idcritere: critere.idcritere,
                 libelle: critere.libelle,
-                description: critere.description,
+                idniveau: critere.idniveau,
                 epreuves
             };
         } catch (error) {
