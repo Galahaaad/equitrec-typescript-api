@@ -70,6 +70,71 @@ components:
         idrole:
           type: integer
     
+    UserResponse:
+      type: object
+      properties:
+        idutilisateur:
+          type: integer
+        nomutilisateur:
+          type: string
+        prenomutilisateur:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+        idjuge:
+          type: integer
+          nullable: true
+        idrole:
+          type: integer
+        nomjuge:
+          type: string
+          nullable: true
+        prenomjuge:
+          type: string
+          nullable: true
+        specialite:
+          type: string
+          nullable: true
+        nomrole:
+          type: string
+          nullable: true
+    
+    UpdateUserRequest:
+      type: object
+      properties:
+        nomutilisateur:
+          type: string
+          maxLength: 50
+          description: Nom de l'utilisateur
+        prenomutilisateur:
+          type: string
+          maxLength: 50
+          description: Prénom de l'utilisateur
+        email:
+          type: string
+          format: email
+          description: Adresse email de l'utilisateur
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Nom d'utilisateur pour la connexion
+        idjuge:
+          type: integer
+          nullable: true
+          description: ID du juge associé (optionnel)
+        idrole:
+          type: integer
+          description: ID du rôle de l'utilisateur
+      example:
+        nomutilisateur: "Dupont"
+        prenomutilisateur: "Jean"
+        email: "jean.dupont@example.com"
+        username: "jdupont"
+        idrole: 2
+    
     Club:
       type: object
       properties:
@@ -639,6 +704,114 @@ paths:
                         $ref: '#/components/schemas/User'
         '401':
           description: Token invalide ou expiré
+
+  # === USERS ===
+  /users:
+    get:
+      summary: Liste des utilisateurs
+      description: Récupérer tous les utilisateurs avec leurs informations de juge et rôle
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des utilisateurs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Token invalide ou expiré
+
+  /users/{id}:
+    get:
+      summary: Détails d'un utilisateur
+      description: Récupérer un utilisateur par son ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur trouvé
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: Utilisateur non trouvé
+        '401':
+          description: Token invalide ou expiré
+    
+    put:
+      summary: Modifier un utilisateur
+      description: Modifier un utilisateur (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Utilisateur modifié avec succès
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Données invalides
+        '404':
+          description: Utilisateur non trouvé
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+    
+    delete:
+      summary: Supprimer un utilisateur
+      description: Supprimer un utilisateur (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur supprimé avec succès
+        '404':
+          description: Utilisateur non trouvé
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
 
   # === CLUBS ===
   /clubs:
