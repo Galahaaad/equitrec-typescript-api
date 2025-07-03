@@ -1,5 +1,6 @@
 import { pool } from '../config/database';
 import { FicheNotation, CreateFicheNotationRequest, UpdateFicheNotationRequest, CreateFicheNotationResponse } from '../models/FicheNotation';
+import { FicheNotationWithCategories, CategorieInFiche } from '../models/FicheCategorie';
 
 export class FicheNotationService {
 
@@ -245,6 +246,111 @@ export class FicheNotationService {
         } catch (error) {
             await client.query('ROLLBACK');
             console.error('Erreur lors de la suppression de la fiche de notation:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    // Méthodes pour la gestion des catégories
+    static async getFicheNotationWithCategories(id: number): Promise<FicheNotationWithCategories> {
+        try {
+            // Récupérer la fiche de notation
+            const fiche = await this.getFicheNotationById(id);
+
+            // Récupérer toutes les catégories associées à cette fiche
+            const categoriesQuery = `
+                SELECT c.idcategorie, c.libelle, c.notefinal
+                FROM contenir cont
+                JOIN categorie c ON cont.idcategorie = c.idcategorie
+                WHERE cont.idfichenotation = $1
+                ORDER BY c.libelle ASC
+            `;
+            
+            const categoriesResult = await pool.query(categoriesQuery, [id]);
+            const categories: CategorieInFiche[] = categoriesResult.rows;
+
+            return {
+                idfichenotation: fiche.idfichenotation,
+                cumulenote: fiche.cumulenote,
+                appreciation: fiche.appreciation,
+                isvalidate: fiche.isvalidate,
+                idcavalier: fiche.idcavalier,
+                idepreuve: fiche.idepreuve,
+                nomcavalier: fiche.nomcavalier,
+                prenomcavalier: fiche.prenomcavalier,
+                nomclub: fiche.nomclub,
+                titre: fiche.titre,
+                categories
+            };
+        } catch (error) {
+            console.error('Erreur lors de la récupération de la fiche avec catégories:', error);
+            throw error;
+        }
+    }
+
+    static async assignCategorieToFiche(ficheId: number, categorieId: number): Promise<void> {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Vérifier que la fiche existe
+            await this.getFicheNotationById(ficheId);
+
+            // Vérifier que la catégorie existe
+            const categorieQuery = 'SELECT idcategorie FROM categorie WHERE idcategorie = $1';
+            const categorieResult = await client.query(categorieQuery, [categorieId]);
+            
+            if (categorieResult.rows.length === 0) {
+                throw new Error('La catégorie spécifiée n\'existe pas');
+            }
+
+            // Vérifier que la relation n'existe pas déjà
+            const existingQuery = 'SELECT 1 FROM contenir WHERE idfichenotation = $1 AND idcategorie = $2';
+            const existingResult = await client.query(existingQuery, [ficheId, categorieId]);
+            
+            if (existingResult.rows.length > 0) {
+                throw new Error('Cette catégorie est déjà assignée à cette fiche de notation');
+            }
+
+            // Créer la relation
+            const insertQuery = 'INSERT INTO contenir (idfichenotation, idcategorie) VALUES ($1, $2)';
+            await client.query(insertQuery, [ficheId, categorieId]);
+
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('Erreur lors de l\'assignation de la catégorie:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    static async removeCategorieFromFiche(ficheId: number, categorieId: number): Promise<void> {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Vérifier que la fiche existe
+            await this.getFicheNotationById(ficheId);
+
+            // Vérifier que la relation existe
+            const existingQuery = 'SELECT 1 FROM contenir WHERE idfichenotation = $1 AND idcategorie = $2';
+            const existingResult = await client.query(existingQuery, [ficheId, categorieId]);
+            
+            if (existingResult.rows.length === 0) {
+                throw new Error('Cette catégorie n\'est pas assignée à cette fiche de notation');
+            }
+
+            // Supprimer la relation
+            const deleteQuery = 'DELETE FROM contenir WHERE idfichenotation = $1 AND idcategorie = $2';
+            await client.query(deleteQuery, [ficheId, categorieId]);
+
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('Erreur lors de la suppression de la catégorie:', error);
             throw error;
         } finally {
             client.release();
