@@ -134,4 +134,116 @@ export class CategorieController {
             }
         }
     }
+
+    // Méthodes pour la gestion des fiches de notation
+    static async getCategorieWithFiches(req: Request, res: Response): Promise<void> {
+        try {
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID invalide'
+                });
+                return;
+            }
+
+            const categorieWithFiches = await CategorieService.getCategorieWithFiches(id);
+            res.json({
+                success: true,
+                data: categorieWithFiches,
+                message: 'Catégorie avec fiches récupérée avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération de la catégorie avec fiches:', error);
+            if (error instanceof Error && error.message === 'Catégorie non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors de la récupération de la catégorie avec fiches'
+                });
+            }
+        }
+    }
+
+    static async getFichesByCategorie(req: Request, res: Response): Promise<void> {
+        try {
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID invalide'
+                });
+                return;
+            }
+
+            const fiches = await CategorieService.getFichesByCategorie(id);
+            res.json({
+                success: true,
+                data: fiches,
+                message: 'Fiches de notation de la catégorie récupérées avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des fiches par catégorie:', error);
+            if (error instanceof Error && error.message === 'Catégorie non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors de la récupération des fiches'
+                });
+            }
+        }
+    }
+
+    static async assignFicheToCategorie(req: Request, res: Response): Promise<void> {
+        try {
+            const categorieId = parseInt(req.params.id);
+            if (isNaN(categorieId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de catégorie invalide'
+                });
+                return;
+            }
+
+            const { idfichenotation } = req.body;
+            if (!idfichenotation || isNaN(parseInt(idfichenotation))) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de fiche de notation requis et valide'
+                });
+                return;
+            }
+
+            await CategorieService.assignFicheToCategorie(categorieId, parseInt(idfichenotation));
+            res.json({
+                success: true,
+                message: 'Fiche de notation assignée à la catégorie avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de l\'assignation de la fiche:', error);
+            if (error instanceof Error && (
+                error.message === 'Catégorie non trouvée' ||
+                error.message === 'La fiche de notation spécifiée n\'existe pas' ||
+                error.message === 'Cette fiche de notation est déjà assignée à cette catégorie'
+            )) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur lors de l\'assignation de la fiche'
+                });
+            }
+        }
+    }
 }
