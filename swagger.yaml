@@ -341,6 +341,68 @@ components:
                 type: string
                 format: date-time
                 nullable: true
+    
+    EpreuveWithCriteres:
+      type: object
+      properties:
+        idepreuve:
+          type: integer
+        nomepreuve:
+          type: string
+        description:
+          type: string
+          nullable: true
+        idjuge:
+          type: integer
+        nomjuge:
+          type: string
+          nullable: true
+        prenomjuge:
+          type: string
+          nullable: true
+        criteres:
+          type: array
+          items:
+            type: object
+            properties:
+              idcritere:
+                type: integer
+              libelle:
+                type: string
+              description:
+                type: string
+                nullable: true
+    
+    CritereWithEpreuves:
+      type: object
+      properties:
+        idcritere:
+          type: integer
+        libelle:
+          type: string
+        description:
+          type: string
+          nullable: true
+        epreuves:
+          type: array
+          items:
+            type: object
+            properties:
+              idepreuve:
+                type: integer
+              nomepreuve:
+                type: string
+              description:
+                type: string
+                nullable: true
+              idjuge:
+                type: integer
+              nomjuge:
+                type: string
+                nullable: true
+              prenomjuge:
+                type: string
+                nullable: true
 
 paths:
   /:
@@ -1152,6 +1214,94 @@ paths:
       responses:
         '200':
           description: Compétition retirée avec succès
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+
+  /epreuves/{id}/criteres:
+    get:
+      summary: Épreuve avec critères
+      description: Récupérer une épreuve avec tous ses critères d'évaluation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuve avec critères récupérée
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EpreuveWithCriteres'
+        '404':
+          description: Épreuve non trouvée
+
+  /epreuves/{id}/assign-critere:
+    post:
+      summary: Assigner un critère à une épreuve
+      description: Assigner un critère d'évaluation à une épreuve (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - idcritere
+              properties:
+                idcritere:
+                  type: integer
+                  description: ID du critère à assigner
+            examples:
+              exemple:
+                value:
+                  idcritere: 1
+      responses:
+        '200':
+          description: Critère assigné avec succès
+        '400':
+          description: Épreuve/critère non trouvé ou déjà assigné
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+
+  /epreuves/{epreuveId}/criteres/{critereId}:
+    delete:
+      summary: Retirer un critère d'une épreuve
+      description: Retirer un critère d'évaluation d'une épreuve (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: epreuveId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: critereId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Critère retiré avec succès
+        '404':
+          description: Association critère-épreuve non trouvée
         '403':
           description: Accès interdit (SUPER_ADMIN requis)
 
@@ -2179,6 +2329,87 @@ paths:
       responses:
         '201':
           description: Critère créé avec succès
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+
+  /criteres/{id}/epreuves:
+    get:
+      summary: Épreuves par critère
+      description: Récupérer toutes les épreuves associées à un critère
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuves du critère récupérées
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            idepreuve:
+                              type: integer
+                            nomepreuve:
+                              type: string
+                            description:
+                              type: string
+                              nullable: true
+                            idjuge:
+                              type: integer
+                            nomjuge:
+                              type: string
+                              nullable: true
+                            prenomjuge:
+                              type: string
+                              nullable: true
+        '404':
+          description: Critère non trouvé
+
+  /criteres/{id}/assign-epreuve:
+    post:
+      summary: Assigner une épreuve à un critère
+      description: Assigner une épreuve à un critère d'évaluation (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - idepreuve
+              properties:
+                idepreuve:
+                  type: integer
+                  description: ID de l'épreuve à assigner
+            examples:
+              exemple:
+                value:
+                  idepreuve: 1
+      responses:
+        '200':
+          description: Épreuve assignée avec succès
+        '400':
+          description: Critère/épreuve non trouvé ou déjà assigné
         '403':
           description: Accès interdit (SUPER_ADMIN requis)
 
