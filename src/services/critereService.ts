@@ -201,6 +201,8 @@ export class CritereService {
                 idcritere: critere.idcritere,
                 libelle: critere.libelle,
                 idniveau: critere.idniveau,
+                libelleniveau: critere.libelleniveau,
+                descriptionniveau: critere.descriptionniveau,
                 epreuves
             };
         } catch (error) {
