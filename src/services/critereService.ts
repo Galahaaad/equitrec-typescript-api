@@ -1,5 +1,6 @@
 import { pool } from '../config/database';
 import { Critere, CreateCritereRequest, UpdateCritereRequest, CreateCritereResponse } from '../models/Critere';
+import { CritereWithEpreuves, EpreuveInCritere } from '../models/EpreuveCritere';
 
 export class CritereService {
 
@@ -170,6 +171,98 @@ export class CritereService {
         } catch (error) {
             await client.query('ROLLBACK');
             console.error('Erreur lors de la suppression du critère:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    // Méthodes pour la gestion des épreuves
+    static async getCritereWithEpreuves(id: number): Promise<CritereWithEpreuves> {
+        try {
+            // Récupérer le critère
+            const critere = await this.getCritereById(id);
+
+            // Récupérer toutes les épreuves associées à ce critère
+            const epreuvesQuery = `
+                SELECT e.idepreuve, e.titre as nomepreuve, e.description, e.idjuge,
+                       j.nomjuge, j.prenomjuge
+                FROM detenir d
+                JOIN epreuve e ON d.idepreuve = e.idepreuve
+                LEFT JOIN juge j ON e.idjuge = j.idjuge
+                WHERE d.idcritere = $1
+                ORDER BY e.titre ASC
+            `;
+            
+            const epreuvesResult = await pool.query(epreuvesQuery, [id]);
+            const epreuves: EpreuveInCritere[] = epreuvesResult.rows;
+
+            return {
+                idcritere: critere.idcritere,
+                libelle: critere.libelle,
+                description: critere.description,
+                epreuves
+            };
+        } catch (error) {
+            console.error('Erreur lors de la récupération du critère avec épreuves:', error);
+            throw error;
+        }
+    }
+
+    static async getEpreuvesByCritere(critereId: number): Promise<EpreuveInCritere[]> {
+        try {
+            // Vérifier que le critère existe
+            await this.getCritereById(critereId);
+
+            // Récupérer toutes les épreuves associées
+            const query = `
+                SELECT e.idepreuve, e.titre as nomepreuve, e.description, e.idjuge,
+                       j.nomjuge, j.prenomjuge
+                FROM detenir d
+                JOIN epreuve e ON d.idepreuve = e.idepreuve
+                LEFT JOIN juge j ON e.idjuge = j.idjuge
+                WHERE d.idcritere = $1
+                ORDER BY e.titre ASC
+            `;
+            
+            const result = await pool.query(query, [critereId]);
+            return result.rows;
+        } catch (error) {
+            console.error('Erreur lors de la récupération des épreuves par critère:', error);
+            throw error;
+        }
+    }
+
+    static async assignEpreuveToCritere(critereId: number, epreuveId: number): Promise<void> {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Vérifier que le critère existe
+            await this.getCritereById(critereId);
+
+            // Vérifier que l'épreuve existe
+            const epreuveCheckQuery = 'SELECT idepreuve FROM epreuve WHERE idepreuve = $1';
+            const epreuveCheckResult = await client.query(epreuveCheckQuery, [epreuveId]);
+            if (epreuveCheckResult.rows.length === 0) {
+                throw new Error('L\'épreuve spécifiée n\'existe pas');
+            }
+
+            // Vérifier qu'il n'y a pas déjà une association
+            const existingQuery = 'SELECT * FROM detenir WHERE idcritere = $1 AND idepreuve = $2';
+            const existingResult = await client.query(existingQuery, [critereId, epreuveId]);
+            if (existingResult.rows.length > 0) {
+                throw new Error('Cette épreuve est déjà assignée à ce critère');
+            }
+
+            // Créer l'association
+            const insertQuery = 'INSERT INTO detenir (idcritere, idepreuve) VALUES ($1, $2)';
+            await client.query(insertQuery, [critereId, epreuveId]);
+
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('Erreur lors de l\'assignation de l\'épreuve:', error);
             throw error;
         } finally {
             client.release();
