@@ -229,6 +229,111 @@ components:
           type: number
           format: float
     
+    # === RELATIONS FICHE-CATEGORIE ===
+    FicheNotationWithCategories:
+      type: object
+      properties:
+        idfichenotation:
+          type: integer
+        cumulenote:
+          type: number
+          format: float
+        appreciation:
+          type: string
+        isvalidate:
+          type: boolean
+        idcavalier:
+          type: integer
+        idepreuve:
+          type: integer
+        nomcavalier:
+          type: string
+          nullable: true
+        prenomcavalier:
+          type: string
+          nullable: true
+        nomclub:
+          type: string
+          nullable: true
+        titre:
+          type: string
+          nullable: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategorieInFiche'
+    
+    CategorieInFiche:
+      type: object
+      properties:
+        idcategorie:
+          type: integer
+        libelle:
+          type: string
+        notefinal:
+          type: number
+          format: float
+    
+    CategorieWithFiches:
+      type: object
+      properties:
+        idcategorie:
+          type: integer
+        libelle:
+          type: string
+        notefinal:
+          type: number
+          format: float
+        fiches:
+          type: array
+          items:
+            $ref: '#/components/schemas/FicheInCategorie'
+    
+    FicheInCategorie:
+      type: object
+      properties:
+        idfichenotation:
+          type: integer
+        cumulenote:
+          type: number
+          format: float
+        appreciation:
+          type: string
+        isvalidate:
+          type: boolean
+        idcavalier:
+          type: integer
+        idepreuve:
+          type: integer
+        nomcavalier:
+          type: string
+          nullable: true
+        prenomcavalier:
+          type: string
+          nullable: true
+        nomclub:
+          type: string
+          nullable: true
+        titre:
+          type: string
+          nullable: true
+    
+    AssignCategorieToFicheRequest:
+      type: object
+      required:
+        - idcategorie
+      properties:
+        idcategorie:
+          type: integer
+    
+    AssignFicheToCategorieRequest:
+      type: object
+      required:
+        - idfichenotation
+      properties:
+        idfichenotation:
+          type: integer
+    
     Participation:
       type: object
       properties:
@@ -1047,6 +1152,88 @@ paths:
           description: Fiche créée avec succès
         '403':
           description: Accès interdit (JUGE requis)
+
+  /fiches-notation/{id}/categories:
+    get:
+      summary: Fiche de notation avec ses catégories
+      description: Récupérer une fiche de notation avec toutes ses catégories associées
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiche avec catégories récupérée
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/FicheNotationWithCategories'
+        '404':
+          description: Fiche de notation non trouvée
+
+  /fiches-notation/{id}/assign-categorie:
+    post:
+      summary: Assigner une catégorie à une fiche
+      description: Assigner une catégorie à une fiche de notation (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignCategorieToFicheRequest'
+      responses:
+        '200':
+          description: Catégorie assignée avec succès
+        '400':
+          description: Erreur de validation (catégorie inexistante, déjà assignée, etc.)
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+        '404':
+          description: Fiche de notation non trouvée
+
+  /fiches-notation/{ficheId}/categories/{categorieId}:
+    delete:
+      summary: Retirer une catégorie d'une fiche
+      description: Retirer une catégorie d'une fiche de notation (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ficheId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: categorieId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Catégorie retirée avec succès
+        '400':
+          description: Catégorie non assignée à cette fiche
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+        '404':
+          description: Fiche de notation non trouvée
 
   # === ÉPREUVES ===
   /epreuves:
@@ -2575,6 +2762,63 @@ paths:
           description: Données invalides ou catégorie déjà existante
         '403':
           description: Accès interdit (SUPER_ADMIN requis)
+
+  /categories/{id}/fiches:
+    get:
+      summary: Fiches de notation d'une catégorie
+      description: Récupérer toutes les fiches de notation associées à une catégorie
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiches de notation de la catégorie
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FicheInCategorie'
+        '404':
+          description: Catégorie non trouvée
+
+  /categories/{id}/assign-fiche:
+    post:
+      summary: Assigner une fiche à une catégorie
+      description: Assigner une fiche de notation à une catégorie (SUPER_ADMIN uniquement)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignFicheToCategorieRequest'
+      responses:
+        '200':
+          description: Fiche assignée avec succès
+        '400':
+          description: Erreur de validation (fiche inexistante, déjà assignée, etc.)
+        '403':
+          description: Accès interdit (SUPER_ADMIN requis)
+        '404':
+          description: Catégorie non trouvée
 
 tags:
   - name: Authentification
