@@ -8,8 +8,8 @@ export class UserService {
             const query = `
                 SELECT u.idutilisateur, u.nomutilisateur, u.prenomutilisateur, 
                        u.email, u.username, u.idjuge, u.idrole,
-                       j.nomjuge, j.prenomjuge, j.specialite,
-                       r.nomrole
+                       j.nomjuge, j.prenomjuge, j.codepin,
+                       r.libelle as nomrole
                 FROM utilisateur u
                 LEFT JOIN juge j ON u.idjuge = j.idjuge
                 LEFT JOIN role r ON u.idrole = r.idrole
@@ -32,8 +32,8 @@ export class UserService {
             const query = `
                 SELECT u.idutilisateur, u.nomutilisateur, u.prenomutilisateur, 
                        u.email, u.username, u.idjuge, u.idrole,
-                       j.nomjuge, j.prenomjuge, j.specialite,
-                       r.nomrole
+                       j.nomjuge, j.prenomjuge, j.codepin,
+                       r.libelle as nomrole
                 FROM utilisateur u
                 LEFT JOIN juge j ON u.idjuge = j.idjuge
                 LEFT JOIN role r ON u.idrole = r.idrole
