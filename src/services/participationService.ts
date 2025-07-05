@@ -48,9 +48,9 @@ export class ParticipationService {
             }
 
             const insertQuery = `
-                INSERT INTO participer (idcavalier, idcompetition, idniveau, dateinscription) 
-                VALUES ($1, $2, $3, NOW()) 
-                RETURNING idcavalier, idcompetition, idniveau, dateinscription
+                INSERT INTO participer (idcavalier, idcompetition, idniveau) 
+                VALUES ($1, $2, $3) 
+                RETURNING idcavalier, idcompetition, idniveau
             `;
             const result = await client.query(insertQuery, [
                 participationData.idcavalier,
@@ -117,7 +117,6 @@ export class ParticipationService {
                 SELECT 
                     p.idcavalier,
                     p.idniveau,
-                    p.dateinscription,
                     cav.nomcavalier,
                     cav.prenomcavalier,
                     cav.numerodossard,
@@ -164,7 +163,6 @@ export class ParticipationService {
                 SELECT 
                     p.idcompetition,
                     p.idniveau,
-                    p.dateinscription,
                     c.nomcompetition,
                     c.datecompetition,
                     n.libelle as libelleniveau
@@ -214,7 +212,7 @@ export class ParticipationService {
                 UPDATE participer 
                 SET idniveau = $1
                 WHERE idcavalier = $2 AND idcompetition = $3
-                RETURNING idcavalier, idcompetition, idniveau, dateinscription
+                RETURNING idcavalier, idcompetition, idniveau
             `;
             const result = await client.query(updateQuery, [
                 nouveauIdNiveau,
@@ -240,7 +238,6 @@ export class ParticipationService {
                     p.idcavalier,
                     p.idcompetition,
                     p.idniveau,
-                    p.dateinscription,
                     cav.nomcavalier,
                     cav.prenomcavalier,
                     cav.numerodossard,
@@ -277,7 +274,6 @@ export class ParticipationService {
                     p.idcavalier,
                     p.idcompetition,
                     p.idniveau,
-                    p.dateinscription,
                     cav.nomcavalier,
                     cav.prenomcavalier,
                     cav.numerodossard,

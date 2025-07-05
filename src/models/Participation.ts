@@ -2,14 +2,12 @@ export interface Participation {
     idcavalier: number;
     idcompetition: number;
     idniveau: number;
-    dateinscription?: Date;
 }
 
 export interface ParticipationComplete {
     idcavalier: number;
     idcompetition: number;
     idniveau: number;
-    dateinscription?: Date;
     nomcavalier: string;
     prenomcavalier: string;
     numerodossard: number;
@@ -45,7 +43,6 @@ export interface ParticipationDetail {
     datecompetition: Date;
     idniveau: number;
     libelleniveau: string;
-    dateinscription?: Date;
 }
 
 export interface ParticipationsByCompetition {
@@ -64,5 +61,4 @@ export interface ParticipationCavalier {
     nomclub: string;
     idniveau: number;
     libelleniveau: string;
-    dateinscription?: Date;
 }
