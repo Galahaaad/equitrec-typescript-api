@@ -5,7 +5,7 @@ export interface EpreuveCritere {
 
 export interface EpreuveWithCriteres {
     idepreuve: number;
-    nomepreuve: string;
+    titre: string;
     description?: string;
     idjuge: number;
     nomjuge?: string;
@@ -16,7 +16,6 @@ export interface EpreuveWithCriteres {
 export interface CritereInEpreuve {
     idcritere: number;
     libelle: string;
-    description?: string;
 }
 
 export interface CritereWithEpreuves {
@@ -30,7 +29,7 @@ export interface CritereWithEpreuves {
 
 export interface EpreuveInCritere {
     idepreuve: number;
-    nomepreuve: string;
+    titre: string;
     description?: string;
     idjuge: number;
     nomjuge?: string;

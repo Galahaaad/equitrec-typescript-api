@@ -292,7 +292,7 @@ export class EpreuveService {
             const epreuve = await this.getEpreuveById(id);
 
             const criteresQuery = `
-                SELECT c.idcritere, c.libelle, c.description
+                SELECT c.idcritere, c.libelle
                 FROM detenir d
                 JOIN critere c ON d.idcritere = c.idcritere
                 WHERE d.idepreuve = $1
@@ -304,7 +304,7 @@ export class EpreuveService {
 
             return {
                 idepreuve: epreuve.idepreuve,
-                nomepreuve: epreuve.titre,
+                titre: epreuve.titre,
                 description: epreuve.description,
                 idjuge: epreuve.idjuge,
                 nomjuge: epreuve.nomjuge,
