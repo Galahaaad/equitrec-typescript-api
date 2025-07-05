@@ -18,7 +18,7 @@ info:
   contact:
     name: API Equitrec Support
 servers:
-  - url: http://localhost:3000/api/v1
+  - url: http://localhost:3001/api/v1
     description: Serveur de développement
 
 components:
@@ -70,77 +70,42 @@ components:
         idrole:
           type: integer
     
-    UserResponse:
+    Competition:
       type: object
       properties:
+        idcompetition:
+          type: integer
+        nomcompetition:
+          type: string
+        datecompetition:
+          type: string
+          format: date
         idutilisateur:
           type: integer
-        nomutilisateur:
-          type: string
-        prenomutilisateur:
-          type: string
-        email:
-          type: string
-        username:
+    
+    Epreuve:
+      type: object
+      properties:
+        idepreuve:
+          type: integer
+        titre:
           type: string
         idjuge:
           type: integer
-          nullable: true
-        idrole:
-          type: integer
-        nomjuge:
-          type: string
-          nullable: true
-        prenomjuge:
-          type: string
-          nullable: true
-        specialite:
-          type: string
-          nullable: true
-        nomrole:
-          type: string
-          nullable: true
     
-    UpdateUserRequest:
+    FicheNotation:
       type: object
       properties:
-        nomutilisateur:
-          type: string
-          maxLength: 50
-          description: Nom de l'utilisateur
-        prenomutilisateur:
-          type: string
-          maxLength: 50
-          description: Prénom de l'utilisateur
-        email:
-          type: string
-          format: email
-          description: Adresse email de l'utilisateur
-        username:
-          type: string
-          minLength: 3
-          maxLength: 50
-          description: Nom d'utilisateur pour la connexion
-        idjuge:
+        idfichenotation:
           type: integer
-          nullable: true
-          description: ID du juge associé (optionnel)
-        idrole:
+        idepreuve:
           type: integer
-          description: ID du rôle de l'utilisateur
-      example:
-        nomutilisateur: "Dupont"
-        prenomutilisateur: "Jean"
-        email: "jean.dupont@example.com"
-        username: "jdupont"
-        idrole: 2
-    
-    Club:
-      type: object
-      properties:
-        idclub:
+        idcavalier:
           type: integer
-        nomclub:
+        cumulenote:
+          type: number
+          format: float
+        appreciation:
           type: string
     
     Cavalier:
@@ -159,72 +124,22 @@ components:
           type: integer
         idclub:
           type: integer
+    
+    Club:
+      type: object
+      properties:
+        idclub:
+          type: integer
         nomclub:
           type: string
-          nullable: true
-    
-    Competition:
-      type: object
-      properties:
-        idcompetition:
-          type: integer
-        nomcompetition:
+        siret:
           type: string
-        datecompetition:
+        adresse:
           type: string
-          format: date
-        lieu:
+        departement:
           type: string
-        description:
+        region:
           type: string
-          nullable: true
-    
-    Epreuve:
-      type: object
-      properties:
-        idepreuve:
-          type: integer
-        nomepreuve:
-          type: string
-        description:
-          type: string
-          nullable: true
-        idjuge:
-          type: integer
-        nomjuge:
-          type: string
-          nullable: true
-        prenomjuge:
-          type: string
-          nullable: true
-    
-    FicheNotation:
-      type: object
-      properties:
-        idfichenotation:
-          type: integer
-        noteFinale:
-          type: number
-          format: float
-        commentaires:
-          type: string
-          nullable: true
-        date:
-          type: string
-          format: date
-        idcavalier:
-          type: integer
-        idepreuve:
-          type: integer
-        nomcavalier:
-          type: string
-          nullable: true
-        prenomcavalier:
-          type: string
-          nullable: true
-        nomepreuve:
-          type: string
-          nullable: true
     
     Juge:
       type: object
@@ -237,392 +152,90 @@ components:
           type: string
         specialite:
           type: string
-          nullable: true
-    
-    Caracteristique:
-      type: object
-      properties:
-        idcaracteristique:
-          type: integer
-        libelle:
-          type: string
-        description:
-          type: string
-          nullable: true
-    
-    Materiel:
-      type: object
-      properties:
-        idmateriel:
-          type: integer
-        libelle:
-          type: string
-        description:
-          type: string
-          nullable: true
-    
-    Niveau:
-      type: object
-      properties:
-        idniveau:
-          type: integer
-        libelle:
-          type: string
-        description:
-          type: string
-          nullable: true
-    
-    Critere:
-      type: object
-      properties:
-        idcritere:
-          type: integer
-        libelle:
-          type: string
-        description:
-          type: string
-          nullable: true
     
     Categorie:
       type: object
       properties:
         idcategorie:
           type: integer
-        libelle:
+        nomcategorie:
           type: string
-        notefinal:
+        coefficient:
           type: number
           format: float
     
-    # === RELATIONS FICHE-CATEGORIE ===
-    FicheNotationWithCategories:
-      type: object
-      properties:
-        idfichenotation:
-          type: integer
-        cumulenote:
-          type: number
-          format: float
-        appreciation:
-          type: string
-        isvalidate:
-          type: boolean
-        idcavalier:
-          type: integer
-        idepreuve:
-          type: integer
-        nomcavalier:
-          type: string
-          nullable: true
-        prenomcavalier:
-          type: string
-          nullable: true
-        nomclub:
-          type: string
-          nullable: true
-        titre:
-          type: string
-          nullable: true
-        categories:
-          type: array
-          items:
-            $ref: '#/components/schemas/CategorieInFiche'
-    
-    CategorieInFiche:
-      type: object
-      properties:
-        idcategorie:
-          type: integer
-        libelle:
-          type: string
-        notefinal:
-          type: number
-          format: float
-    
-    CategorieWithFiches:
-      type: object
-      properties:
-        idcategorie:
-          type: integer
-        libelle:
-          type: string
-        notefinal:
-          type: number
-          format: float
-        fiches:
-          type: array
-          items:
-            $ref: '#/components/schemas/FicheInCategorie'
-    
-    FicheInCategorie:
-      type: object
-      properties:
-        idfichenotation:
-          type: integer
-        cumulenote:
-          type: number
-          format: float
-        appreciation:
-          type: string
-        isvalidate:
-          type: boolean
-        idcavalier:
-          type: integer
-        idepreuve:
-          type: integer
-        nomcavalier:
-          type: string
-          nullable: true
-        prenomcavalier:
-          type: string
-          nullable: true
-        nomclub:
-          type: string
-          nullable: true
-        titre:
-          type: string
-          nullable: true
-    
-    AssignCategorieToFicheRequest:
-      type: object
-      required:
-        - idcategorie
-      properties:
-        idcategorie:
-          type: integer
-    
-    AssignFicheToCategorieRequest:
-      type: object
-      required:
-        - idfichenotation
-      properties:
-        idfichenotation:
-          type: integer
-    
-    Participation:
-      type: object
-      properties:
-        idcavalier:
-          type: integer
-        idcompetition:
-          type: integer
-        idniveau:
-          type: integer
-        dateinscription:
-          type: string
-          format: date-time
-          nullable: true
-    
-    ParticipationComplete:
-      type: object
-      properties:
-        idcavalier:
-          type: integer
-        idcompetition:
-          type: integer
-        idniveau:
-          type: integer
-        dateinscription:
-          type: string
-          format: date-time
-          nullable: true
-        nomcavalier:
-          type: string
-        prenomcavalier:
-          type: string
-        numerodossard:
-          type: integer
-        idclub:
-          type: integer
-        nomclub:
-          type: string
-        nomcompetition:
-          type: string
-        datecompetition:
-          type: string
-          format: date-time
-        libelleniveau:
-          type: string
-    
-    ParticipationsByCavalier:
-      type: object
-      properties:
-        idcavalier:
-          type: integer
-        nomcavalier:
-          type: string
-        prenomcavalier:
-          type: string
-        numerodossard:
-          type: integer
-        participations:
-          type: array
-          items:
-            type: object
-            properties:
-              idcompetition:
-                type: integer
-              nomcompetition:
-                type: string
-              datecompetition:
-                type: string
-                format: date-time
-              idniveau:
-                type: integer
-              libelleniveau:
-                type: string
-              dateinscription:
-                type: string
-                format: date-time
-                nullable: true
-    
-    ParticipationsByCompetition:
-      type: object
-      properties:
-        idcompetition:
-          type: integer
-        nomcompetition:
-          type: string
-        datecompetition:
-          type: string
-          format: date-time
-        participations:
-          type: array
-          items:
-            type: object
-            properties:
-              idcavalier:
-                type: integer
-              nomcavalier:
-                type: string
-              prenomcavalier:
-                type: string
-              numerodossard:
-                type: integer
-              idclub:
-                type: integer
-              nomclub:
-                type: string
-              idniveau:
-                type: integer
-              libelleniveau:
-                type: string
-              dateinscription:
-                type: string
-                format: date-time
-                nullable: true
-    
-    EpreuveWithCriteres:
-      type: object
-      properties:
-        idepreuve:
-          type: integer
-        nomepreuve:
-          type: string
-        description:
-          type: string
-          nullable: true
-        idjuge:
-          type: integer
-        nomjuge:
-          type: string
-          nullable: true
-        prenomjuge:
-          type: string
-          nullable: true
-        criteres:
-          type: array
-          items:
-            type: object
-            properties:
-              idcritere:
-                type: integer
-              libelle:
-                type: string
-              description:
-                type: string
-                nullable: true
-    
-    CritereWithEpreuves:
+    Critere:
       type: object
       properties:
         idcritere:
           type: integer
-        libelle:
+        nomcritere:
           type: string
-        description:
+        valorisation:
+          type: number
+          format: float
+    
+    Caracteristique:
+      type: object
+      properties:
+        idcaracteristique:
+          type: integer
+        nomcaracteristique:
           type: string
-          nullable: true
-        epreuves:
-          type: array
-          items:
-            type: object
-            properties:
-              idepreuve:
-                type: integer
-              nomepreuve:
-                type: string
-              description:
-                type: string
-                nullable: true
-              idjuge:
-                type: integer
-              nomjuge:
-                type: string
-                nullable: true
-              prenomjuge:
-                type: string
-                nullable: true
+    
+    Materiel:
+      type: object
+      properties:
+        idmateriel:
+          type: integer
+        nommateriel:
+          type: string
+    
+    Niveau:
+      type: object
+      properties:
+        idniveau:
+          type: integer
+        nomniveau:
+          type: string
+    
+    QRGenerateRequest:
+      type: object
+      properties:
+        judgeId:
+          type: integer
+        competitionId:
+          type: integer
+    
+    QRValidateRequest:
+      type: object
+      properties:
+        qrToken:
+          type: string
 
 paths:
-  /:
-    get:
-      summary: Message de bienvenue
-      description: Endpoint racine avec message d'accueil et informations API
-      responses:
-        '200':
-          description: Message de bienvenue
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-
+  # Health check
   /health:
     get:
-      summary: Vérification de santé
-      description: Endpoint de santé avec vérification de la connexion base de données
+      summary: Vérifier l'état de l'API
       responses:
         '200':
-          description: Service fonctionnel
+          description: API opérationnelle
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
-        '500':
-          description: Erreur service
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  # === AUTHENTIFICATION ===
+  
+  # Authentication
   /auth/register:
     post:
-      summary: Inscription utilisateur
-      description: Créer un nouveau compte utilisateur avec assignation de rôle
+      summary: Inscription d'un nouvel utilisateur
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - nomutilisateur
-                - prenomutilisateur
-                - email
-                - username
-                - password
-                - idrole
               properties:
                 nomutilisateur:
                   type: string
@@ -630,38 +243,27 @@ paths:
                   type: string
                 email:
                   type: string
-                  format: email
                 username:
                   type: string
                 password:
                   type: string
                 idrole:
                   type: integer
-                  description: "1=SUPER_ADMIN, 2=GÉRANT, 3=JUGE"
-                idjuge:
-                  type: integer
-                  nullable: true
       responses:
         '201':
           description: Utilisateur créé avec succès
         '400':
-          description: Données invalides
-        '409':
-          description: Email ou username déjà utilisé
-
+          description: Erreur de validation
+  
   /auth/login:
     post:
       summary: Connexion utilisateur
-      description: Authentification et génération du token JWT
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - username
-                - password
               properties:
                 username:
                   type: string
@@ -669,7 +271,7 @@ paths:
                   type: string
       responses:
         '200':
-          description: Connexion réussie avec token JWT
+          description: Connexion réussie
           content:
             application/json:
               schema:
@@ -683,989 +285,88 @@ paths:
                     $ref: '#/components/schemas/User'
         '401':
           description: Identifiants invalides
-
+  
   /auth/profile:
     get:
-      summary: Profil utilisateur
-      description: Récupérer les informations du profil utilisateur connecté
+      summary: Profil utilisateur connecté
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Profil récupéré avec succès
+          description: Profil utilisateur
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/User'
-        '401':
-          description: Token invalide ou expiré
-
-  # === USERS ===
-  /users:
-    get:
-      summary: Liste des utilisateurs
-      description: Récupérer tous les utilisateurs avec leurs informations de juge et rôle
+                $ref: '#/components/schemas/User'
+  
+  # QR Code
+  /qr/generate:
+    post:
+      summary: Générer un QR Code pour juge/compétition
       security:
         - bearerAuth: []
-      responses:
-        '200':
-          description: Liste des utilisateurs
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/UserResponse'
-        '401':
-          description: Token invalide ou expiré
-
-  /users/{id}:
-    get:
-      summary: Détails d'un utilisateur
-      description: Récupérer un utilisateur par son ID
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Utilisateur trouvé
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/UserResponse'
-        '404':
-          description: Utilisateur non trouvé
-        '401':
-          description: Token invalide ou expiré
-    
-    put:
-      summary: Modifier un utilisateur
-      description: Modifier un utilisateur (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserRequest'
+              $ref: '#/components/schemas/QRGenerateRequest'
       responses:
         '200':
-          description: Utilisateur modifié avec succès
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/UserResponse'
+          description: QR Code généré
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /qr/generate/bulk/{competitionId}:
+    post:
+      summary: Générer tous les QR Codes d'une compétition
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: competitionId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: QR Codes générés
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /qr/validate:
+    post:
+      summary: Valider un QR Code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QRValidateRequest'
+      responses:
+        '200':
+          description: QR Code validé
         '400':
-          description: Données invalides
-        '404':
-          description: Utilisateur non trouvé
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-    
-    delete:
-      summary: Supprimer un utilisateur
-      description: Supprimer un utilisateur (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Utilisateur supprimé avec succès
-        '404':
-          description: Utilisateur non trouvé
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === CLUBS ===
-  /clubs:
+          description: QR Code invalide
+  
+  /qr/status/{competitionId}:
     get:
-      summary: Liste des clubs
-      description: Récupérer tous les clubs
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Liste des clubs
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Club'
-
-  /clubs/{id}:
-    get:
-      summary: Détails d'un club
-      description: Récupérer un club par son ID
+      summary: Statut des QR Codes d'une compétition
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: competitionId
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Club trouvé
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Club'
-        '404':
-          description: Club non trouvé
-    delete:
-      summary: Supprimer un club
-      description: Supprimer un club (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Club supprimé avec succès
-        '404':
-          description: Club non trouvé
+          description: Statut des QR Codes
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /clubs/create:
-    post:
-      summary: Créer un club
-      description: Créer un nouveau club (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - nomclub
-              properties:
-                nomclub:
-                  type: string
-                  maxLength: 100
-      responses:
-        '201':
-          description: Club créé avec succès
-        '409':
-          description: Club avec ce nom existe déjà
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === CAVALIERS ===
-  /cavaliers:
-    get:
-      summary: Liste des cavaliers
-      description: Récupérer tous les cavaliers avec informations des clubs
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Liste des cavaliers
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Cavalier'
-
-  /cavaliers/{id}:
-    get:
-      summary: Détails d'un cavalier
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Cavalier trouvé
-        '404':
-          description: Cavalier non trouvé
-    put:
-      summary: Modifier un cavalier
-      description: Modifier un cavalier (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                nomcavalier:
-                  type: string
-                prenomcavalier:
-                  type: string
-                datenaissance:
-                  type: string
-                  format: date
-                numerodossard:
-                  type: integer
-                idclub:
-                  type: integer
-      responses:
-        '200':
-          description: Cavalier modifié avec succès
-        '404':
-          description: Cavalier non trouvé
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-    delete:
-      summary: Supprimer un cavalier
-      description: Supprimer un cavalier (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Cavalier supprimé avec succès
-        '404':
-          description: Cavalier non trouvé
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /cavaliers/club/{clubId}:
-    get:
-      summary: Cavaliers par club
-      description: Récupérer tous les cavaliers d'un club spécifique
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: clubId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Liste des cavaliers du club
-
-  /cavaliers/create:
-    post:
-      summary: Créer un cavalier
-      description: Créer un nouveau cavalier (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - nomcavalier
-                - prenomcavalier
-                - datenaissance
-                - numerodossard
-                - idclub
-              properties:
-                nomcavalier:
-                  type: string
-                prenomcavalier:
-                  type: string
-                datenaissance:
-                  type: string
-                  format: date
-                numerodossard:
-                  type: integer
-                idclub:
-                  type: integer
-      responses:
-        '201':
-          description: Cavalier créé avec succès
-        '409':
-          description: Numéro de dossard déjà utilisé
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /cavaliers/{id}/participations:
-    get:
-      summary: Participations d'un cavalier
-      description: Récupérer toutes les participations d'un cavalier
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Participations du cavalier récupérées
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/ParticipationsByCavalier'
-        '404':
-          description: Cavalier non trouvé
-    post:
-      summary: Inscrire un cavalier à une compétition
-      description: Inscrire un cavalier à une compétition avec un niveau (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - idcompetition
-                - idniveau
-              properties:
-                idcompetition:
-                  type: integer
-                  description: ID de la compétition
-                idniveau:
-                  type: integer
-                  description: ID du niveau de participation
-            examples:
-              exemple:
-                value:
-                  idcompetition: 1
-                  idniveau: 2
-      responses:
-        '201':
-          description: Cavalier inscrit avec succès
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Participation'
-        '404':
-          description: Cavalier, compétition ou niveau non trouvé
-        '409':
-          description: Cavalier déjà inscrit à cette compétition
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /cavaliers/{id}/participations/{competitionId}:
-    delete:
-      summary: Retirer une participation
-      description: Retirer un cavalier d'une compétition (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: competitionId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Participation retirée avec succès
-        '404':
-          description: Participation non trouvée
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /cavaliers/{id}/participations/{competitionId}/niveau:
-    put:
-      summary: Changer le niveau de participation
-      description: Modifier le niveau d'un cavalier pour une compétition (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: competitionId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - idniveau
-              properties:
-                idniveau:
-                  type: integer
-                  description: Nouveau ID du niveau
-            examples:
-              exemple:
-                value:
-                  idniveau: 3
-      responses:
-        '200':
-          description: Niveau modifié avec succès
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Participation'
-        '404':
-          description: Participation ou niveau non trouvé
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === FICHES NOTATION ===
-  /fiches-notation:
-    get:
-      summary: Liste des fiches de notation
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Liste des fiches de notation
-
-  /fiches-notation/{id}:
-    get:
-      summary: Détails d'une fiche de notation
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Fiche de notation trouvée
-        '404':
-          description: Fiche de notation non trouvée
-    put:
-      summary: Modifier une fiche de notation
-      description: Modifier une fiche de notation (JUGE uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Fiche modifiée avec succès
-        '403':
-          description: Accès interdit (JUGE requis)
-    delete:
-      summary: Supprimer une fiche de notation
-      description: Supprimer une fiche de notation (JUGE uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Fiche supprimée avec succès
-        '403':
-          description: Accès interdit (JUGE requis)
-
-  /fiches-notation/cavalier/{cavalierId}:
-    get:
-      summary: Fiches par cavalier
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: cavalierId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Liste des fiches du cavalier
-
-  /fiches-notation/epreuve/{epreuveId}:
-    get:
-      summary: Fiches par épreuve
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: epreuveId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Liste des fiches de l'épreuve
-
-  /fiches-notation/create:
-    post:
-      summary: Créer une fiche de notation
-      description: Créer une nouvelle fiche de notation (JUGE uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - noteFinale
-                - idcavalier
-                - idepreuve
-              properties:
-                noteFinale:
-                  type: number
-                  format: float
-                commentaires:
-                  type: string
-                idcavalier:
-                  type: integer
-                idepreuve:
-                  type: integer
-      responses:
-        '201':
-          description: Fiche créée avec succès
-        '403':
-          description: Accès interdit (JUGE requis)
-
-  /fiches-notation/{id}/categories:
-    get:
-      summary: Fiche de notation avec ses catégories
-      description: Récupérer une fiche de notation avec toutes ses catégories associées
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Fiche avec catégories récupérée
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/FicheNotationWithCategories'
-        '404':
-          description: Fiche de notation non trouvée
-
-  /fiches-notation/{id}/assign-categorie:
-    post:
-      summary: Assigner une catégorie à une fiche
-      description: Assigner une catégorie à une fiche de notation (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AssignCategorieToFicheRequest'
-      responses:
-        '200':
-          description: Catégorie assignée avec succès
-        '400':
-          description: Erreur de validation (catégorie inexistante, déjà assignée, etc.)
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-        '404':
-          description: Fiche de notation non trouvée
-
-  /fiches-notation/{ficheId}/categories/{categorieId}:
-    delete:
-      summary: Retirer une catégorie d'une fiche
-      description: Retirer une catégorie d'une fiche de notation (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: ficheId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: categorieId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Catégorie retirée avec succès
-        '400':
-          description: Catégorie non assignée à cette fiche
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-        '404':
-          description: Fiche de notation non trouvée
-
-  # === ÉPREUVES ===
-  /epreuves:
-    get:
-      summary: Liste des épreuves
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Liste des épreuves
-
-  /epreuves/{id}:
-    get:
-      summary: Détails d'une épreuve
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Épreuve trouvée
-        '404':
-          description: Épreuve non trouvée
-    put:
-      summary: Modifier une épreuve
-      description: Modifier une épreuve (JUGE uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Épreuve modifiée avec succès
-        '403':
-          description: Accès interdit (JUGE requis)
-    delete:
-      summary: Supprimer une épreuve
-      description: Supprimer une épreuve (JUGE uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Épreuve supprimée avec succès
-        '403':
-          description: Accès interdit (JUGE requis)
-
-  /epreuves/{id}/competitions:
-    get:
-      summary: Épreuve avec compétitions
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Épreuve avec ses compétitions
-
-  /epreuves/juge/{jugeId}:
-    get:
-      summary: Épreuves par juge
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: jugeId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Liste des épreuves du juge
-
-  /epreuves/create:
-    post:
-      summary: Créer une épreuve
-      description: Créer une nouvelle épreuve (JUGE uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - nomepreuve
-                - idjuge
-              properties:
-                nomepreuve:
-                  type: string
-                description:
-                  type: string
-                idjuge:
-                  type: integer
-      responses:
-        '201':
-          description: Épreuve créée avec succès
-        '403':
-          description: Accès interdit (JUGE requis)
-
-  /epreuves/{id}/assign-competition:
-    post:
-      summary: Assigner une compétition à une épreuve
-      description: Assigner une compétition à une épreuve (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - idcompetition
-              properties:
-                idcompetition:
-                  type: integer
-      responses:
-        '200':
-          description: Compétition assignée avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /epreuves/{epreuveId}/competitions/{competitionId}:
-    delete:
-      summary: Retirer une compétition d'une épreuve
-      description: Retirer une compétition d'une épreuve (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: epreuveId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: competitionId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Compétition retirée avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /epreuves/{id}/criteres:
-    get:
-      summary: Épreuve avec critères
-      description: Récupérer une épreuve avec tous ses critères d'évaluation
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Épreuve avec critères récupérée
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/EpreuveWithCriteres'
-        '404':
-          description: Épreuve non trouvée
-
-  /epreuves/{id}/assign-critere:
-    post:
-      summary: Assigner un critère à une épreuve
-      description: Assigner un critère d'évaluation à une épreuve (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - idcritere
-              properties:
-                idcritere:
-                  type: integer
-                  description: ID du critère à assigner
-            examples:
-              exemple:
-                value:
-                  idcritere: 1
-      responses:
-        '200':
-          description: Critère assigné avec succès
-        '400':
-          description: Épreuve/critère non trouvé ou déjà assigné
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /epreuves/{epreuveId}/criteres/{critereId}:
-    delete:
-      summary: Retirer un critère d'une épreuve
-      description: Retirer un critère d'évaluation d'une épreuve (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: epreuveId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: critereId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Critère retiré avec succès
-        '404':
-          description: Association critère-épreuve non trouvée
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === COMPÉTITIONS ===
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  # Competitions
   /competitions:
     get:
       summary: Liste des compétitions
@@ -1674,7 +375,38 @@ paths:
       responses:
         '200':
           description: Liste des compétitions
-
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competition'
+  
+  /competitions/create:
+    post:
+      summary: Créer une compétition
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nomcompetition:
+                  type: string
+                datecompetition:
+                  type: string
+                  format: date
+                idutilisateur:
+                  type: integer
+      responses:
+        '201':
+          description: Compétition créée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
   /competitions/upcoming:
     get:
       summary: Compétitions à venir
@@ -1682,239 +414,122 @@ paths:
         - bearerAuth: []
       responses:
         '200':
-          description: Liste des compétitions futures
-
+          description: Compétitions à venir
+  
   /competitions/date/{date}:
     get:
       summary: Compétitions par date
       security:
         - bearerAuth: []
       parameters:
-        - name: date
-          in: path
+        - in: path
+          name: date
           required: true
           schema:
             type: string
             format: date
       responses:
         '200':
-          description: Liste des compétitions à cette date
-
+          description: Compétitions de la date
+  
   /competitions/{id}:
     get:
       summary: Détails d'une compétition
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Compétition trouvée
-        '404':
-          description: Compétition non trouvée
+          description: Détails de la compétition
     put:
       summary: Modifier une compétition
-      description: Modifier une compétition (SUPER_ADMIN uniquement)
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Compétition modifiée avec succès
+          description: Compétition modifiée
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
+          description: Accès refusé (SUPER_ADMIN requis)
     delete:
       summary: Supprimer une compétition
-      description: Supprimer une compétition (SUPER_ADMIN uniquement)
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Compétition supprimée avec succès
+          description: Compétition supprimée
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
+          description: Accès refusé (SUPER_ADMIN requis)
+  
   /competitions/{id}/judges:
     get:
-      summary: Compétition avec juges
+      summary: Compétition avec ses juges
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Compétition avec ses juges
-
+          description: Compétition avec juges
+  
   /competitions/{id}/epreuves:
     get:
-      summary: Compétition avec épreuves
+      summary: Compétition avec ses épreuves
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Compétition avec ses épreuves
-
+          description: Compétition avec épreuves
+  
   /competitions/{id}/cavaliers:
     get:
-      summary: Compétition avec cavaliers
-      description: Récupère une compétition avec la liste de tous les cavaliers participants et leur niveau
+      summary: Compétition avec ses cavaliers
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
-            description: ID de la compétition
       responses:
         '200':
-          description: Compétition avec ses cavaliers participants
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  data:
-                    type: object
-                    properties:
-                      idcompetition:
-                        type: integer
-                        example: 1
-                      nomcompetition:
-                        type: string
-                        example: "Championnat Regional"
-                      datecompetition:
-                        type: string
-                        format: date-time
-                        example: "2024-06-15T10:00:00Z"
-                      idutilisateur:
-                        type: integer
-                        example: 1
-                      nomutilisateur:
-                        type: string
-                        example: "Dupont"
-                      prenomutilisateur:
-                        type: string
-                        example: "Jean"
-                      cavaliers:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            idcavalier:
-                              type: integer
-                              example: 1
-                            nomcavalier:
-                              type: string
-                              example: "Martin"
-                            prenomcavalier:
-                              type: string
-                              example: "Sophie"
-                            numerodossard:
-                              type: integer
-                              example: 42
-                            idclub:
-                              type: integer
-                              example: 1
-                            nomclub:
-                              type: string
-                              example: "Club Equestre de Paris"
-                            idniveau:
-                              type: integer
-                              example: 2
-                            libelleniveau:
-                              type: string
-                              example: "Galop 5"
-                  message:
-                    type: string
-                    example: "Compétition avec cavaliers récupérée avec succès"
-        '400':
-          description: ID invalide
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Compétition non trouvée
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Token manquant ou invalide
-        '500':
-          description: Erreur serveur
-
-  /competitions/create:
-    post:
-      summary: Créer une compétition
-      description: Créer une nouvelle compétition (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - nomcompetition
-                - datecompetition
-                - lieu
-              properties:
-                nomcompetition:
-                  type: string
-                datecompetition:
-                  type: string
-                  format: date
-                lieu:
-                  type: string
-                description:
-                  type: string
-      responses:
-        '201':
-          description: Compétition créée avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
+          description: Compétition avec cavaliers
+  
   /competitions/{id}/assign-judge:
     post:
       summary: Assigner un juge à une compétition
-      description: Assigner un juge à une compétition (SUPER_ADMIN uniquement)
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
@@ -1924,68 +539,812 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - idjuge
               properties:
-                idjuge:
+                judgeId:
                   type: integer
       responses:
         '200':
-          description: Juge assigné avec succès
+          description: Juge assigné
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
+          description: Accès refusé (SUPER_ADMIN requis)
+  
   /competitions/{competitionId}/judges/{judgeId}:
     delete:
       summary: Retirer un juge d'une compétition
-      description: Retirer un juge d'une compétition (SUPER_ADMIN uniquement)
       security:
         - bearerAuth: []
       parameters:
-        - name: competitionId
-          in: path
+        - in: path
+          name: competitionId
           required: true
           schema:
             type: integer
-        - name: judgeId
-          in: path
+        - in: path
+          name: judgeId
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Juge retiré avec succès
+          description: Juge retiré
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /competitions/{id}/assign-epreuve:
+    post:
+      summary: Assigner une épreuve à une compétition
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                epreuveId:
+                  type: integer
+      responses:
+        '200':
+          description: Épreuve assignée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /competitions/{competitionId}/epreuves/{epreuveId}:
+    delete:
+      summary: Retirer une épreuve d'une compétition
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: competitionId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: epreuveId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuve retirée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
   /competitions/{id}/participations:
     get:
       summary: Participations d'une compétition
-      description: Récupérer toutes les participations (cavaliers inscrits) d'une compétition
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Participations de la compétition récupérées
+          description: Participations de la compétition
+  
+  /competitions/{id}/validate:
+    post:
+      summary: Valider une compétition (génère fiches et QR codes)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Compétition validée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  # Fiches Notation
+  /fiches-notation:
+    get:
+      summary: Liste des fiches de notation
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des fiches
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/ParticipationsByCompetition'
-        '404':
-          description: Compétition non trouvée
-
-  # === JUGES ===
+                type: array
+                items:
+                  $ref: '#/components/schemas/FicheNotation'
+  
+  /fiches-notation/create:
+    post:
+      summary: Créer une fiche de notation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idepreuve:
+                  type: integer
+                idcavalier:
+                  type: integer
+                cumulenote:
+                  type: number
+                  format: float
+                appreciation:
+                  type: string
+      responses:
+        '201':
+          description: Fiche créée
+        '403':
+          description: Accès refusé (JUGE requis)
+  
+  /fiches-notation/{id}:
+    get:
+      summary: Détails d'une fiche de notation
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails de la fiche
+    put:
+      summary: Modifier une fiche de notation
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiche modifiée
+        '403':
+          description: Accès refusé (JUGE requis)
+    delete:
+      summary: Supprimer une fiche de notation
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiche supprimée
+        '403':
+          description: Accès refusé (JUGE requis)
+  
+  /fiches-notation/{id}/categories:
+    get:
+      summary: Fiche avec ses catégories
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiche avec catégories
+  
+  /fiches-notation/cavalier/{cavalierId}:
+    get:
+      summary: Fiches d'un cavalier
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: cavalierId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiches du cavalier
+  
+  /fiches-notation/epreuve/{epreuveId}:
+    get:
+      summary: Fiches d'une épreuve
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: epreuveId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiches de l'épreuve
+  
+  /fiches-notation/{id}/assign-categorie:
+    post:
+      summary: Assigner une catégorie à une fiche
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categorieId:
+                  type: integer
+      responses:
+        '200':
+          description: Catégorie assignée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /fiches-notation/{ficheId}/categories/{categorieId}:
+    delete:
+      summary: Retirer une catégorie d'une fiche
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: ficheId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: categorieId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Catégorie retirée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /fiches-notation/competition/{competitionId}/epreuve/{epreuveId}:
+    delete:
+      summary: Suppression centralisée fiches par compétition/épreuve
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: competitionId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: epreuveId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiches supprimées
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /fiches-notation/competition/{competitionId}:
+    delete:
+      summary: Suppression centralisée fiches par compétition
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: competitionId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiches supprimées
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  # Epreuves
+  /epreuves:
+    get:
+      summary: Liste des épreuves
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des épreuves
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Epreuve'
+  
+  /epreuves/create:
+    post:
+      summary: Créer une épreuve
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                titre:
+                  type: string
+                idjuge:
+                  type: integer
+      responses:
+        '201':
+          description: Épreuve créée
+        '403':
+          description: Accès refusé (JUGE requis)
+  
+  /epreuves/{id}:
+    get:
+      summary: Détails d'une épreuve
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails de l'épreuve
+    put:
+      summary: Modifier une épreuve
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuve modifiée
+        '403':
+          description: Accès refusé (JUGE requis)
+    delete:
+      summary: Supprimer une épreuve
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuve supprimée
+        '403':
+          description: Accès refusé (JUGE requis)
+  
+  /epreuves/{id}/competitions:
+    get:
+      summary: Épreuve avec ses compétitions
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuve avec compétitions
+  
+  /epreuves/{id}/criteres:
+    get:
+      summary: Épreuve avec ses critères
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuve avec critères
+  
+  /epreuves/juge/{jugeId}:
+    get:
+      summary: Épreuves d'un juge
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: jugeId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuves du juge
+  
+  /epreuves/{id}/assign-competition:
+    post:
+      summary: Assigner une compétition à une épreuve
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                competitionId:
+                  type: integer
+      responses:
+        '200':
+          description: Compétition assignée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /epreuves/{epreuveId}/competitions/{competitionId}:
+    delete:
+      summary: Retirer une compétition d'une épreuve
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: epreuveId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: competitionId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Compétition retirée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /epreuves/{id}/assign-critere:
+    post:
+      summary: Assigner un critère à une épreuve
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                critereId:
+                  type: integer
+      responses:
+        '200':
+          description: Critère assigné
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /epreuves/{epreuveId}/criteres/{critereId}:
+    delete:
+      summary: Retirer un critère d'une épreuve
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: epreuveId
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: critereId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Critère retiré
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  # Cavaliers
+  /cavaliers:
+    get:
+      summary: Liste des cavaliers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des cavaliers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cavalier'
+  
+  /cavaliers/create:
+    post:
+      summary: Créer un cavalier
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nomcavalier:
+                  type: string
+                prenomcavalier:
+                  type: string
+                datenaissance:
+                  type: string
+                  format: date
+                numerodossard:
+                  type: integer
+                idclub:
+                  type: integer
+      responses:
+        '201':
+          description: Cavalier créé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /cavaliers/{id}:
+    get:
+      summary: Détails d'un cavalier
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails du cavalier
+    put:
+      summary: Modifier un cavalier
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cavalier modifié
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+    delete:
+      summary: Supprimer un cavalier
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cavalier supprimé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /cavaliers/{id}/participations:
+    get:
+      summary: Participations d'un cavalier
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Participations du cavalier
+    post:
+      summary: Inscrire un cavalier à une compétition
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idcompetition:
+                  type: integer
+                idniveau:
+                  type: integer
+      responses:
+        '201':
+          description: Cavalier inscrit
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /cavaliers/{id}/club:
+    get:
+      summary: Cavalier avec son club
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cavalier avec club
+  
+  # Clubs
+  /clubs:
+    get:
+      summary: Liste des clubs
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des clubs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Club'
+  
+  /clubs/create:
+    post:
+      summary: Créer un club
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nomclub:
+                  type: string
+                siret:
+                  type: string
+                adresse:
+                  type: string
+                departement:
+                  type: string
+                region:
+                  type: string
+      responses:
+        '201':
+          description: Club créé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /clubs/{id}:
+    get:
+      summary: Détails d'un club
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails du club
+    put:
+      summary: Modifier un club
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Club modifié
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+    delete:
+      summary: Supprimer un club
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Club supprimé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /clubs/{id}/cavaliers:
+    get:
+      summary: Cavaliers d'un club
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cavaliers du club
+  
+  # Juges
   /judges:
     get:
       summary: Liste des juges
@@ -1994,75 +1353,16 @@ paths:
       responses:
         '200':
           description: Liste des juges
-
-  /judges/{id}:
-    get:
-      summary: Détails d'un juge
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Juge trouvé
-        '404':
-          description: Juge non trouvé
-    put:
-      summary: Modifier un juge
-      description: Modifier un juge (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Juge modifié avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-    delete:
-      summary: Supprimer un juge
-      description: Supprimer un juge (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Juge supprimé avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /judges/{id}/competitions:
-    get:
-      summary: Juge avec compétitions
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Juge avec ses compétitions
-
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Juge'
+  
   /judges/create:
     post:
       summary: Créer un juge
-      description: Créer un nouveau juge (SUPER_ADMIN uniquement)
       security:
         - bearerAuth: []
       requestBody:
@@ -2071,9 +1371,6 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - nomjuge
-                - prenomjuge
               properties:
                 nomjuge:
                   type: string
@@ -2083,701 +1380,74 @@ paths:
                   type: string
       responses:
         '201':
-          description: Juge créé avec succès
+          description: Juge créé
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === QR CODE AUTHENTICATION ===
-  /qr/validate:
-    post:
-      summary: Valider un QR Code
-      description: Validation d'un QR Code pour authentification juge (public)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - qrData
-              properties:
-                qrData:
-                  type: string
-                  description: Données du QR Code à valider
-      responses:
-        '200':
-          description: QR Code valide, token JWT retourné
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  token:
-                    type: string
-                  message:
-                    type: string
-        '400':
-          description: QR Code invalide ou expiré
-
-  /qr/generate:
-    post:
-      summary: Générer un QR Code
-      description: Générer un QR Code pour un juge spécifique (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - judgeId
-                - competitionId
-              properties:
-                judgeId:
-                  type: integer
-                competitionId:
-                  type: integer
-      responses:
-        '200':
-          description: QR Code généré avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /qr/generate/bulk/{competitionId}:
-    post:
-      summary: Générer QR Codes en masse
-      description: Générer des QR Codes pour tous les juges d'une compétition (SUPER_ADMIN uniquement)
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /judges/{id}:
+    get:
+      summary: Détails d'un juge
       security:
         - bearerAuth: []
       parameters:
-        - name: competitionId
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: QR Codes générés avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /qr/status/{competitionId}:
-    get:
-      summary: Statut QR Code compétition
-      description: Récupérer le statut des QR Codes pour une compétition (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: competitionId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Statut QR Codes récupéré
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === CARACTÉRISTIQUES ===
-  /caracteristiques:
-    get:
-      summary: Liste des caractéristiques
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Liste des caractéristiques
-
-  /caracteristiques/{id}:
-    get:
-      summary: Détails d'une caractéristique
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Caractéristique trouvée
-        '404':
-          description: Caractéristique non trouvée
+          description: Détails du juge
     put:
-      summary: Modifier une caractéristique
-      description: Modifier une caractéristique (SUPER_ADMIN uniquement)
+      summary: Modifier un juge
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Caractéristique modifiée avec succès
+          description: Juge modifié
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
+          description: Accès refusé (SUPER_ADMIN requis)
     delete:
-      summary: Supprimer une caractéristique
-      description: Supprimer une caractéristique (SUPER_ADMIN uniquement)
+      summary: Supprimer un juge
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Caractéristique supprimée avec succès
+          description: Juge supprimé
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /caracteristiques/epreuve/{epreuveId}:
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /judges/{id}/competitions:
     get:
-      summary: Caractéristiques par épreuve
+      summary: Compétitions d'un juge
       security:
         - bearerAuth: []
       parameters:
-        - name: epreuveId
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Liste des caractéristiques de l'épreuve
-
-  /caracteristiques/create:
-    post:
-      summary: Créer une caractéristique
-      description: Créer une nouvelle caractéristique (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - libelle
-              properties:
-                libelle:
-                  type: string
-                description:
-                  type: string
-      responses:
-        '201':
-          description: Caractéristique créée avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /caracteristiques/epreuve/{epreuveId}/assign:
-    post:
-      summary: Assigner une caractéristique à une épreuve
-      description: Assigner une caractéristique à une épreuve (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: epreuveId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - idcaracteristique
-              properties:
-                idcaracteristique:
-                  type: integer
-      responses:
-        '200':
-          description: Caractéristique assignée avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /caracteristiques/epreuve/{epreuveId}/caracteristique/{caracteristiqueId}:
-    delete:
-      summary: Retirer une caractéristique d'une épreuve
-      description: Retirer une caractéristique d'une épreuve (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: epreuveId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: caracteristiqueId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Caractéristique retirée avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === MATÉRIAUX ===
-  /materiaux:
-    get:
-      summary: Liste des matériaux
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Liste des matériaux
-
-  /materiaux/{id}:
-    get:
-      summary: Détails d'un matériau
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Matériau trouvé
-        '404':
-          description: Matériau non trouvé
-    put:
-      summary: Modifier un matériau
-      description: Modifier un matériau (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Matériau modifié avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-    delete:
-      summary: Supprimer un matériau
-      description: Supprimer un matériau (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Matériau supprimé avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /materiaux/epreuve/{epreuveId}:
-    get:
-      summary: Matériaux par épreuve
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: epreuveId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Liste des matériaux de l'épreuve avec quantités
-
-  /materiaux/create:
-    post:
-      summary: Créer un matériau
-      description: Créer un nouveau matériau (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - libelle
-              properties:
-                libelle:
-                  type: string
-                description:
-                  type: string
-      responses:
-        '201':
-          description: Matériau créé avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /materiaux/epreuve/{epreuveId}/assign:
-    post:
-      summary: Assigner un matériau à une épreuve
-      description: Assigner un matériau à une épreuve avec quantité (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: epreuveId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - idmateriel
-                - quantite
-              properties:
-                idmateriel:
-                  type: integer
-                quantite:
-                  type: integer
-                  minimum: 1
-      responses:
-        '200':
-          description: Matériau assigné avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /materiaux/epreuve/{epreuveId}/materiel/{materielId}/quantite:
-    put:
-      summary: Modifier la quantité d'un matériau pour une épreuve
-      description: Modifier la quantité d'un matériau pour une épreuve (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: epreuveId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: materielId
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - quantite
-              properties:
-                quantite:
-                  type: integer
-                  minimum: 1
-      responses:
-        '200':
-          description: Quantité modifiée avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /materiaux/epreuve/{epreuveId}/materiel/{materielId}:
-    delete:
-      summary: Retirer un matériau d'une épreuve
-      description: Retirer un matériau d'une épreuve (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: epreuveId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: materielId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Matériau retiré avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === NIVEAUX ===
-  /niveaux:
-    get:
-      summary: Liste des niveaux
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Liste des niveaux
-
-  /niveaux/{id}:
-    get:
-      summary: Détails d'un niveau
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Niveau trouvé
-        '404':
-          description: Niveau non trouvé
-    put:
-      summary: Modifier un niveau
-      description: Modifier un niveau (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Niveau modifié avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-    delete:
-      summary: Supprimer un niveau
-      description: Supprimer un niveau (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Niveau supprimé avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /niveaux/create:
-    post:
-      summary: Créer un niveau
-      description: Créer un nouveau niveau (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - libelle
-              properties:
-                libelle:
-                  type: string
-                description:
-                  type: string
-      responses:
-        '201':
-          description: Niveau créé avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === CRITÈRES ===
-  /criteres:
-    get:
-      summary: Liste des critères
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Liste des critères
-
-  /criteres/{id}:
-    get:
-      summary: Détails d'un critère
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Critère trouvé
-        '404':
-          description: Critère non trouvé
-    put:
-      summary: Modifier un critère
-      description: Modifier un critère (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Critère modifié avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-    delete:
-      summary: Supprimer un critère
-      description: Supprimer un critère (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Critère supprimé avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /criteres/create:
-    post:
-      summary: Créer un critère
-      description: Créer un nouveau critère (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - libelle
-              properties:
-                libelle:
-                  type: string
-                description:
-                  type: string
-      responses:
-        '201':
-          description: Critère créé avec succès
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /criteres/{id}/epreuves:
-    get:
-      summary: Épreuves par critère
-      description: Récupérer toutes les épreuves associées à un critère
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Épreuves du critère récupérées
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            idepreuve:
-                              type: integer
-                            nomepreuve:
-                              type: string
-                            description:
-                              type: string
-                              nullable: true
-                            idjuge:
-                              type: integer
-                            nomjuge:
-                              type: string
-                              nullable: true
-                            prenomjuge:
-                              type: string
-                              nullable: true
-        '404':
-          description: Critère non trouvé
-
-  /criteres/{id}/assign-epreuve:
-    post:
-      summary: Assigner une épreuve à un critère
-      description: Assigner une épreuve à un critère d'évaluation (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - idepreuve
-              properties:
-                idepreuve:
-                  type: integer
-                  description: ID de l'épreuve à assigner
-            examples:
-              exemple:
-                value:
-                  idepreuve: 1
-      responses:
-        '200':
-          description: Épreuve assignée avec succès
-        '400':
-          description: Critère/épreuve non trouvé ou déjà assigné
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  # === CATÉGORIES ===
+          description: Compétitions du juge
+  
+  # Catégories
   /categories:
     get:
       summary: Liste des catégories
-      description: Récupérer toutes les catégories de notation
       security:
         - bearerAuth: []
       responses:
@@ -2786,112 +1456,13 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Categorie'
-
-  /categories/{id}:
-    get:
-      summary: Détails d'une catégorie
-      description: Récupérer une catégorie par son ID
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Catégorie trouvée
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Categorie'
-        '404':
-          description: Catégorie non trouvée
-    put:
-      summary: Modifier une catégorie
-      description: Modifier une catégorie (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                libelle:
-                  type: string
-                  maxLength: 50
-                notefinal:
-                  type: number
-                  format: float
-                  minimum: 0
-                  maximum: 20
-      responses:
-        '200':
-          description: Catégorie modifiée avec succès
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Categorie'
-        '400':
-          description: Données invalides
-        '404':
-          description: Catégorie non trouvée
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-    delete:
-      summary: Supprimer une catégorie
-      description: Supprimer une catégorie (SUPER_ADMIN uniquement)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Catégorie supprimée avec succès
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-        '404':
-          description: Catégorie non trouvée
-        '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
+                type: array
+                items:
+                  $ref: '#/components/schemas/Categorie'
+  
   /categories/create:
     post:
       summary: Créer une catégorie
-      description: Créer une nouvelle catégorie (SUPER_ADMIN uniquement)
       security:
         - bearerAuth: []
       requestBody:
@@ -2900,80 +1471,86 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - libelle
-                - notefinal
               properties:
-                libelle:
+                nomcategorie:
                   type: string
-                  maxLength: 50
-                  description: Nom de la catégorie
-                notefinal:
+                coefficient:
                   type: number
                   format: float
-                  minimum: 0
-                  maximum: 20
-                  description: Note finale sur 20
-            examples:
-              exemple:
-                value:
-                  libelle: "Allures"
-                  notefinal: 10
       responses:
         '201':
-          description: Catégorie créée avec succès
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Categorie'
-        '400':
-          description: Données invalides ou catégorie déjà existante
+          description: Catégorie créée
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-
-  /categories/{id}/fiches:
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /categories/{id}:
     get:
-      summary: Fiches de notation d'une catégorie
-      description: Récupérer toutes les fiches de notation associées à une catégorie
+      summary: Détails d'une catégorie
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Fiches de notation de la catégorie
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/FicheInCategorie'
-        '404':
-          description: Catégorie non trouvée
-
-  /categories/{id}/assign-fiche:
-    post:
-      summary: Assigner une fiche à une catégorie
-      description: Assigner une fiche de notation à une catégorie (SUPER_ADMIN uniquement)
+          description: Détails de la catégorie
+    put:
+      summary: Modifier une catégorie
       security:
         - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Catégorie modifiée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+    delete:
+      summary: Supprimer une catégorie
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Catégorie supprimée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /categories/{id}/fiches:
+    get:
+      summary: Fiches d'une catégorie
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Fiches de la catégorie
+  
+  /categories/{id}/assign-fiche:
+    post:
+      summary: Assigner une fiche à une catégorie
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
           required: true
           schema:
             type: integer
@@ -2982,43 +1559,511 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AssignFicheToCategorieRequest'
+              type: object
+              properties:
+                ficheId:
+                  type: integer
       responses:
         '200':
-          description: Fiche assignée avec succès
-        '400':
-          description: Erreur de validation (fiche inexistante, déjà assignée, etc.)
+          description: Fiche assignée
         '403':
-          description: Accès interdit (SUPER_ADMIN requis)
-        '404':
-          description: Catégorie non trouvée
-
-tags:
-  - name: Authentification
-    description: Gestion des utilisateurs et authentification JWT/QR
-  - name: Clubs
-    description: Gestion des clubs équestres
-  - name: Cavaliers
-    description: Gestion des cavaliers et participants
-  - name: Compétitions
-    description: Gestion des compétitions équestres
-  - name: Épreuves
-    description: Gestion des épreuves et défis
-  - name: Fiches Notation
-    description: Système de notation et évaluation
-  - name: Juges
-    description: Gestion des juges et experts
-  - name: QR Code
-    description: Authentification QR Code innovante pour juges
-  - name: Caractéristiques
-    description: Gestion des caractéristiques d'épreuves
-  - name: Matériaux
-    description: Gestion des matériaux et équipements
-  - name: Niveaux
-    description: Gestion des niveaux de compétition
-  - name: Critères
-    description: Gestion des critères d'évaluation
-  - name: Catégories
-    description: Gestion des catégories de notation
-  - name: Participations
-    description: Gestion des inscriptions cavaliers-compétitions
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  # Critères
+  /criteres:
+    get:
+      summary: Liste des critères
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des critères
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Critere'
+  
+  /criteres/create:
+    post:
+      summary: Créer un critère
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nomcritere:
+                  type: string
+                valorisation:
+                  type: number
+                  format: float
+      responses:
+        '201':
+          description: Critère créé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /criteres/{id}:
+    get:
+      summary: Détails d'un critère
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails du critère
+    put:
+      summary: Modifier un critère
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Critère modifié
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+    delete:
+      summary: Supprimer un critère
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Critère supprimé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /criteres/{id}/epreuves:
+    get:
+      summary: Épreuves d'un critère
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuves du critère
+  
+  # Caractéristiques
+  /caracteristiques:
+    get:
+      summary: Liste des caractéristiques
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des caractéristiques
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Caracteristique'
+  
+  /caracteristiques/create:
+    post:
+      summary: Créer une caractéristique
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nomcaracteristique:
+                  type: string
+      responses:
+        '201':
+          description: Caractéristique créée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /caracteristiques/{id}:
+    get:
+      summary: Détails d'une caractéristique
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails de la caractéristique
+    put:
+      summary: Modifier une caractéristique
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Caractéristique modifiée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+    delete:
+      summary: Supprimer une caractéristique
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Caractéristique supprimée
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /caracteristiques/{id}/epreuves:
+    get:
+      summary: Épreuves d'une caractéristique
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuves de la caractéristique
+  
+  # Matériels
+  /materiaux:
+    get:
+      summary: Liste des matériels
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des matériels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Materiel'
+  
+  /materiaux/create:
+    post:
+      summary: Créer un matériel
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nommateriel:
+                  type: string
+      responses:
+        '201':
+          description: Matériel créé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /materiaux/{id}:
+    get:
+      summary: Détails d'un matériel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails du matériel
+    put:
+      summary: Modifier un matériel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Matériel modifié
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+    delete:
+      summary: Supprimer un matériel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Matériel supprimé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /materiaux/{id}/epreuves:
+    get:
+      summary: Épreuves d'un matériel
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Épreuves du matériel
+  
+  # Niveaux
+  /niveaux:
+    get:
+      summary: Liste des niveaux
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des niveaux
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Niveau'
+  
+  /niveaux/create:
+    post:
+      summary: Créer un niveau
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nomniveau:
+                  type: string
+      responses:
+        '201':
+          description: Niveau créé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /niveaux/{id}:
+    get:
+      summary: Détails d'un niveau
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails du niveau
+    put:
+      summary: Modifier un niveau
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Niveau modifié
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+    delete:
+      summary: Supprimer un niveau
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Niveau supprimé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /niveaux/{id}/cavaliers:
+    get:
+      summary: Cavaliers d'un niveau
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cavaliers du niveau
+  
+  # Users
+  /users:
+    get:
+      summary: Liste des utilisateurs
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des utilisateurs
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  
+  /users/create:
+    post:
+      summary: Créer un utilisateur
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nomutilisateur:
+                  type: string
+                prenomutilisateur:
+                  type: string
+                email:
+                  type: string
+                username:
+                  type: string
+                password:
+                  type: string
+                idrole:
+                  type: integer
+      responses:
+        '201':
+          description: Utilisateur créé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /users/{id}:
+    get:
+      summary: Détails d'un utilisateur
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails de l'utilisateur
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+    put:
+      summary: Modifier un utilisateur
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur modifié
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+    delete:
+      summary: Supprimer un utilisateur
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur supprimé
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)
+  
+  /users/{id}/role:
+    get:
+      summary: Utilisateur avec son rôle
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur avec rôle
+        '403':
+          description: Accès refusé (SUPER_ADMIN requis)

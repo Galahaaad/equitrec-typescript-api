@@ -473,4 +473,38 @@ export class CompetitionController {
             });
         }
     }
+
+    static async validateCompetition(req: Request, res: Response): Promise<void> {
+        try {
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de compétition invalide'
+                });
+                return;
+            }
+
+            const result = await CompetitionService.validateCompetition(id);
+            
+            res.json({
+                success: true,
+                data: result,
+                message: result.message
+            });
+        } catch (error) {
+            console.error('Erreur lors de la validation de la compétition:', error);
+            if (error instanceof Error && error.message === 'Compétition non trouvée') {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Erreur lors de la validation de la compétition'
+                });
+            }
+        }
+    }
 }

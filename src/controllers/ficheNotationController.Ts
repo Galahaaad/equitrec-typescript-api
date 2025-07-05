@@ -301,4 +301,71 @@ export class FicheNotationController {
             }
         }
     }
+
+    static async deleteFichesNotationByCompetitionAndEpreuve(req: Request, res: Response): Promise<void> {
+        try {
+            const competitionId = parseInt(req.params.competitionId);
+            const epreuveId = parseInt(req.params.epreuveId);
+            
+            if (isNaN(competitionId) || isNaN(epreuveId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'IDs de compétition et épreuve invalides'
+                });
+                return;
+            }
+
+            await FicheNotationService.deleteFichesNotationByCompetitionAndEpreuve(competitionId, epreuveId);
+            res.json({
+                success: true,
+                message: 'Fiches de notation supprimées avec succès pour cette épreuve'
+            });
+        } catch (error) {
+            console.error('Erreur lors de la suppression des fiches par compétition et épreuve:', error);
+            if (error instanceof Error && error.message.includes('non trouvée')) {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Erreur lors de la suppression des fiches de notation'
+                });
+            }
+        }
+    }
+
+    static async deleteFichesNotationByCompetition(req: Request, res: Response): Promise<void> {
+        try {
+            const competitionId = parseInt(req.params.competitionId);
+            
+            if (isNaN(competitionId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de compétition invalide'
+                });
+                return;
+            }
+
+            await FicheNotationService.deleteFichesNotationByCompetition(competitionId);
+            res.json({
+                success: true,
+                message: 'Toutes les fiches de notation de la compétition supprimées avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de la suppression des fiches par compétition:', error);
+            if (error instanceof Error && error.message.includes('non trouvée')) {
+                res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    success: false,
+                    message: error instanceof Error ? error.message : 'Erreur lors de la suppression des fiches de notation'
+                });
+            }
+        }
+    }
 }

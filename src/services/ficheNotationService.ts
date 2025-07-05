@@ -249,6 +249,80 @@ export class FicheNotationService {
         }
     }
 
+    static async deleteFichesNotationByCompetitionAndEpreuve(competitionId: number, epreuveId: number): Promise<void> {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Vérifier que la relation composer existe
+            const composerCheckQuery = 'SELECT 1 FROM composer WHERE idcompetition = $1 AND idepreuve = $2';
+            const composerCheckResult = await client.query(composerCheckQuery, [competitionId, epreuveId]);
+            if (composerCheckResult.rows.length === 0) {
+                throw new Error('Relation competition-epreuve non trouvée dans la table composer');
+            }
+
+            // Récupérer toutes les fiches de notation pour cette épreuve
+            const ficheIdsQuery = 'SELECT idfichenotation FROM fichenotation WHERE idepreuve = $1';
+            const ficheIdsResult = await client.query(ficheIdsQuery, [epreuveId]);
+            const ficheIds = ficheIdsResult.rows.map(row => row.idfichenotation);
+
+            if (ficheIds.length > 0) {
+                // Supprimer les relations dans la table contenir
+                const deleteContenirQuery = 'DELETE FROM contenir WHERE idfichenotation = ANY($1)';
+                await client.query(deleteContenirQuery, [ficheIds]);
+
+                // Supprimer les fiches de notation
+                const deleteFichesQuery = 'DELETE FROM fichenotation WHERE idepreuve = $1';
+                await client.query(deleteFichesQuery, [epreuveId]);
+            }
+
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('Erreur lors de la suppression des fiches de notation par compétition et épreuve:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    static async deleteFichesNotationByCompetition(competitionId: number): Promise<void> {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Récupérer toutes les épreuves de cette compétition
+            const epreuvesQuery = 'SELECT idepreuve FROM composer WHERE idcompetition = $1';
+            const epreuvesResult = await client.query(epreuvesQuery, [competitionId]);
+            const epreuveIds = epreuvesResult.rows.map(row => row.idepreuve);
+
+            if (epreuveIds.length > 0) {
+                // Récupérer toutes les fiches de notation pour ces épreuves
+                const ficheIdsQuery = 'SELECT idfichenotation FROM fichenotation WHERE idepreuve = ANY($1)';
+                const ficheIdsResult = await client.query(ficheIdsQuery, [epreuveIds]);
+                const ficheIds = ficheIdsResult.rows.map(row => row.idfichenotation);
+
+                if (ficheIds.length > 0) {
+                    // Supprimer les relations dans la table contenir
+                    const deleteContenirQuery = 'DELETE FROM contenir WHERE idfichenotation = ANY($1)';
+                    await client.query(deleteContenirQuery, [ficheIds]);
+
+                    // Supprimer les fiches de notation
+                    const deleteFichesQuery = 'DELETE FROM fichenotation WHERE idepreuve = ANY($1)';
+                    await client.query(deleteFichesQuery, [epreuveIds]);
+                }
+            }
+
+            await client.query('COMMIT');
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('Erreur lors de la suppression des fiches de notation par compétition:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
     static async getFicheNotationWithCategories(id: number): Promise<FicheNotationWithCategories> {
         try {
             const fiche = await this.getFicheNotationById(id);

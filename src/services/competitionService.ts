@@ -1,5 +1,7 @@
 import { pool } from '../config/database';
 import { Competition, CreateCompetitionRequest, UpdateCompetitionRequest, CreateCompetitionResponse, CompetitionWithJudges, JugeAssignment, CompetitionWithEpreuves, EpreuveInCompetition, CompetitionWithCavaliers, CavalierInCompetition } from '../models/Competition';
+import { FicheNotationService } from './ficheNotationService';
+import { QRCodeService } from './qrCodeService';
 
 export class CompetitionService {
 
@@ -417,6 +419,94 @@ export class CompetitionService {
         } catch (error) {
             console.error('Erreur lors de la récupération de la compétition avec cavaliers:', error);
             throw error;
+        }
+    }
+
+    static async validateCompetition(competitionId: number): Promise<{
+        competition: Competition;
+        fichesCreated: number;
+        qrCodesGenerated: number;
+        message: string;
+    }> {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Vérifier que la compétition existe
+            const competition = await this.getCompetitionById(competitionId);
+
+            // 1. Supprimer toutes les fiches de notation existantes pour cette compétition
+            await FicheNotationService.deleteFichesNotationByCompetition(competitionId);
+
+            // 2. Récupérer toutes les épreuves de la compétition
+            const epreuvesQuery = 'SELECT idepreuve FROM composer WHERE idcompetition = $1';
+            const epreuvesResult = await client.query(epreuvesQuery, [competitionId]);
+            const epreuveIds = epreuvesResult.rows.map(row => row.idepreuve);
+
+            // 3. Récupérer tous les cavaliers participants
+            const cavaliersQuery = 'SELECT idcavalier FROM participer WHERE idcompetition = $1';
+            const cavaliersResult = await client.query(cavaliersQuery, [competitionId]);
+            const cavalierIds = cavaliersResult.rows.map(row => row.idcavalier);
+
+            // 4. Récupérer toutes les catégories disponibles
+            const categoriesQuery = 'SELECT idcategorie FROM categorie';
+            const categoriesResult = await client.query(categoriesQuery);
+            const categorieIds = categoriesResult.rows.map(row => row.idcategorie);
+
+            if (categorieIds.length === 0) {
+                throw new Error('Aucune catégorie disponible pour créer les fiches de notation');
+            }
+
+            // 5. Créer les nouvelles fiches de notation
+            let fichesCreated = 0;
+            for (const epreuveId of epreuveIds) {
+                for (const cavalierId of cavalierIds) {
+                    // Créer la fiche de notation
+                    const ficheResult = await client.query(`
+                        INSERT INTO fichenotation (cumulenote, appreciation, isvalidate, idcavalier, idepreuve) 
+                        VALUES ($1, $2, $3, $4, $5) 
+                        RETURNING idfichenotation
+                    `, [0, 'À évaluer', false, cavalierId, epreuveId]);
+
+                    const ficheId = ficheResult.rows[0].idfichenotation;
+
+                    // Assigner toutes les catégories à cette fiche
+                    for (const categorieId of categorieIds) {
+                        await client.query(
+                            'INSERT INTO contenir (idfichenotation, idcategorie) VALUES ($1, $2)',
+                            [ficheId, categorieId]
+                        );
+                    }
+
+                    fichesCreated++;
+                }
+            }
+
+            await client.query('COMMIT');
+
+            // 6. Générer les QR codes pour tous les juges de la compétition
+            let qrCodesGenerated = 0;
+            try {
+                const qrCodes = await QRCodeService.generateBulkQRCodes(competitionId);
+                qrCodesGenerated = qrCodes.length;
+            } catch (qrError) {
+                console.warn('Erreur lors de la génération des QR codes:', qrError);
+                // On continue même si les QR codes échouent
+            }
+
+            return {
+                competition,
+                fichesCreated,
+                qrCodesGenerated,
+                message: `Compétition validée avec succès. ${fichesCreated} fiches de notation créées${qrCodesGenerated > 0 ? ` et ${qrCodesGenerated} QR codes générés` : ''}.`
+            };
+
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('Erreur lors de la validation de la compétition:', error);
+            throw error;
+        } finally {
+            client.release();
         }
     }
 }

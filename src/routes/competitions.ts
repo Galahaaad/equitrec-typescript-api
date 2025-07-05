@@ -24,4 +24,6 @@ router.delete('/:competitionId/epreuves/:epreuveId', authenticateToken, requireS
 
 router.get('/:id/participations', authenticateToken, CompetitionController.getParticipationsByCompetition);
 
+router.post('/:id/validate', authenticateToken, requireSuperAdmin, CompetitionController.validateCompetition);
+
 export default router;

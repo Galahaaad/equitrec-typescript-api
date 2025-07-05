@@ -16,4 +16,8 @@ router.delete('/:id', authenticateToken, requireJudgeRole, FicheNotationControll
 router.post('/:id/assign-categorie', authenticateToken, requireSuperAdmin, FicheNotationController.assignCategorieToFiche);
 router.delete('/:ficheId/categories/:categorieId', authenticateToken, requireSuperAdmin, FicheNotationController.removeCategorieFromFiche);
 
+// Suppression centralisée via table Composer
+router.delete('/competition/:competitionId/epreuve/:epreuveId', authenticateToken, requireSuperAdmin, FicheNotationController.deleteFichesNotationByCompetitionAndEpreuve);
+router.delete('/competition/:competitionId', authenticateToken, requireSuperAdmin, FicheNotationController.deleteFichesNotationByCompetition);
+
 export default router;
