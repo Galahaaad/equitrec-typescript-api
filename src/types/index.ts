@@ -1,4 +1,3 @@
-// src/types/index.ts
 import { Request } from 'express';
 
 export interface ApiResponse<T = any> {

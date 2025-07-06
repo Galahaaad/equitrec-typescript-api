@@ -9,14 +9,13 @@ router.get('/:id', authenticateToken, FicheNotationController.getFicheNotationBy
 router.get('/:id/categories', authenticateToken, FicheNotationController.getFicheNotationWithCategories);
 router.get('/cavalier/:cavalierId', authenticateToken, FicheNotationController.getFichesNotationByCavalier);
 router.get('/epreuve/:epreuveId', authenticateToken, FicheNotationController.getFichesNotationByEpreuve);
-router.post('/create', authenticateToken, requireJudgeRole, FicheNotationController.createFicheNotation);
+router.post('/create', authenticateToken, requireSuperAdmin, FicheNotationController.createFicheNotation);
 router.put('/:id', authenticateToken, requireJudgeRole, FicheNotationController.updateFicheNotation);
 router.delete('/:id', authenticateToken, requireJudgeRole, FicheNotationController.deleteFicheNotation);
 
 router.post('/:id/assign-categorie', authenticateToken, requireSuperAdmin, FicheNotationController.assignCategorieToFiche);
 router.delete('/:ficheId/categories/:categorieId', authenticateToken, requireSuperAdmin, FicheNotationController.removeCategorieFromFiche);
 
-// Suppression centralisée via table Composer
 router.delete('/competition/:competitionId/epreuve/:epreuveId', authenticateToken, requireSuperAdmin, FicheNotationController.deleteFichesNotationByCompetitionAndEpreuve);
 router.delete('/competition/:competitionId', authenticateToken, requireSuperAdmin, FicheNotationController.deleteFichesNotationByCompetition);
 
