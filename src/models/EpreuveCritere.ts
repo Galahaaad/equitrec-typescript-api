@@ -7,7 +7,7 @@ export interface EpreuveWithCriteres {
     idepreuve: number;
     titre: string;
     description?: string;
-    idjuge: number;
+    idjuge: number | null;
     nomjuge?: string;
     prenomjuge?: string;
     criteres: CritereInEpreuve[];
@@ -31,7 +31,7 @@ export interface EpreuveInCritere {
     idepreuve: number;
     titre: string;
     description?: string;
-    idjuge: number;
+    idjuge: number | null;
     nomjuge?: string;
     prenomjuge?: string;
 }

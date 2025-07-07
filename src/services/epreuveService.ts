@@ -82,10 +82,13 @@ export class EpreuveService {
             const titreTrimmed = epreuveData.titre.trim();
             const descriptionTrimmed = epreuveData.description.trim();
 
-            const jugeCheckQuery = 'SELECT idjuge FROM juge WHERE idjuge = $1';
-            const jugeCheckResult = await pool.query(jugeCheckQuery, [epreuveData.idjuge]);
-            if (jugeCheckResult.rows.length === 0) {
-                throw new Error('Le juge spécifié n\'existe pas');
+            // Vérifier si un juge est fourni et s'il existe
+            if (epreuveData.idjuge !== undefined && epreuveData.idjuge !== null) {
+                const jugeCheckQuery = 'SELECT idjuge FROM juge WHERE idjuge = $1';
+                const jugeCheckResult = await pool.query(jugeCheckQuery, [epreuveData.idjuge]);
+                if (jugeCheckResult.rows.length === 0) {
+                    throw new Error('Le juge spécifié n\'existe pas');
+                }
             }
 
             const insertQuery = `
@@ -96,7 +99,7 @@ export class EpreuveService {
             const insertResult = await pool.query(insertQuery, [
                 titreTrimmed,
                 descriptionTrimmed,
-                epreuveData.idjuge
+                epreuveData.idjuge || null
             ]);
 
             return insertResult.rows[0];

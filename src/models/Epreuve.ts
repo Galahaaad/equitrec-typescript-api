@@ -2,7 +2,7 @@ export interface Epreuve {
     idepreuve: number;
     titre: string;
     description: string;
-    idjuge: number;
+    idjuge: number | null;
     nomjuge?: string;
     prenomjuge?: string;
 }
@@ -10,7 +10,7 @@ export interface Epreuve {
 export interface CreateEpreuveRequest {
     titre: string;
     description: string;
-    idjuge: number;
+    idjuge?: number;
 }
 
 export interface UpdateEpreuveRequest {
@@ -23,14 +23,14 @@ export interface CreateEpreuveResponse {
     idepreuve: number;
     titre: string;
     description: string;
-    idjuge: number;
+    idjuge: number | null;
 }
 
 export interface EpreuveWithCompetitions {
     idepreuve: number;
     titre: string;
     description: string;
-    idjuge: number;
+    idjuge: number | null;
     nomjuge?: string;
     prenomjuge?: string;
     competitions: CompetitionInEpreuve[];

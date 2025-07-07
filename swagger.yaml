@@ -90,8 +90,17 @@ components:
           type: integer
         titre:
           type: string
+        description:
+          type: string
         idjuge:
           type: integer
+          nullable: true
+        nomjuge:
+          type: string
+          nullable: true
+        prenomjuge:
+          type: string
+          nullable: true
     
     FicheNotation:
       type: object
@@ -174,6 +183,34 @@ components:
         valorisation:
           type: number
           format: float
+    
+    EpreuveWithCriteres:
+      type: object
+      properties:
+        idepreuve:
+          type: integer
+        titre:
+          type: string
+        description:
+          type: string
+        idjuge:
+          type: integer
+          nullable: true
+        nomjuge:
+          type: string
+          nullable: true
+        prenomjuge:
+          type: string
+          nullable: true
+        criteres:
+          type: array
+          items:
+            type: object
+            properties:
+              idcritere:
+                type: integer
+              libelle:
+                type: string
     
     Caracteristique:
       type: object
@@ -953,6 +990,9 @@ paths:
   /epreuves/create:
     post:
       summary: Créer une épreuve
+      description: |
+        Créer une nouvelle épreuve. L'attribution d'un juge est optionnelle lors de la création.
+        Le juge peut être assigné ultérieurement via les endpoints de modification.
       security:
         - bearerAuth: []
       requestBody:
@@ -961,14 +1001,46 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - titre
+                - description
               properties:
                 titre:
                   type: string
+                  maxLength: 100
+                  description: Titre de l'épreuve (requis, max 100 caractères)
+                description:
+                  type: string
+                  maxLength: 500
+                  description: Description de l'épreuve (requise, max 500 caractères)
                 idjuge:
                   type: integer
+                  nullable: true
+                  description: ID du juge assigné (optionnel)
       responses:
         '201':
-          description: Épreuve créée
+          description: Épreuve créée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Épreuve créée avec succès"
+                  data:
+                    $ref: '#/components/schemas/Epreuve'
+        '400':
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autorisé
         '403':
           description: Accès refusé (JUGE requis)
   
@@ -1046,6 +1118,37 @@ paths:
       responses:
         '200':
           description: Épreuve avec critères
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Épreuve avec critères récupérée avec succès"
+                  data:
+                    $ref: '#/components/schemas/EpreuveWithCriteres'
+        '400':
+          description: ID invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Épreuve non trouvée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   
   /epreuves/juge/{jugeId}:
     get:
