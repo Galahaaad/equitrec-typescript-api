@@ -9,6 +9,7 @@ router.get('/:id', authenticateToken, FicheNotationController.getFicheNotationBy
 router.get('/:id/categories', authenticateToken, FicheNotationController.getFicheNotationWithCategories);
 router.get('/cavalier/:cavalierId', authenticateToken, FicheNotationController.getFichesNotationByCavalier);
 router.get('/epreuve/:epreuveId', authenticateToken, FicheNotationController.getFichesNotationByEpreuve);
+router.get('/cavalier/:cavalierId/competition/:competitionId', authenticateToken, FicheNotationController.getFichesNotationByCavalierAndCompetition);
 router.post('/create', authenticateToken, requireSuperAdmin, FicheNotationController.createFicheNotation);
 router.put('/:id', authenticateToken, requireJudgeRole, FicheNotationController.updateFicheNotation);
 router.delete('/:id', authenticateToken, requireJudgeRole, FicheNotationController.deleteFicheNotation);

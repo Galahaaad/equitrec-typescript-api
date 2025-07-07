@@ -782,6 +782,70 @@ paths:
       responses:
         '200':
           description: Fiches de l'épreuve
+
+  /fiches-notation/cavalier/{cavalierId}/competition/{competitionId}:
+    get:
+      summary: Fiches d'un cavalier pour une compétition spécifique
+      description: |
+        Récupère toutes les fiches de notation d'un cavalier spécifique pour une compétition donnée.
+        Retourne les fiches avec les informations complètes du cavalier, club, épreuve et compétition.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: cavalierId
+          required: true
+          schema:
+            type: integer
+          description: ID du cavalier
+        - in: path
+          name: competitionId
+          required: true
+          schema:
+            type: integer
+          description: ID de la compétition
+      responses:
+        '200':
+          description: Fiches de notation du cavalier pour la compétition
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Fiches de notation du cavalier pour la compétition récupérées avec succès"
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/FicheNotation'
+                        - type: object
+                          properties:
+                            nomcompetition:
+                              type: string
+                              description: Nom de la compétition
+        '400':
+          description: ID cavalier ou compétition invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   
   /fiches-notation/{id}/assign-categorie:
     post:

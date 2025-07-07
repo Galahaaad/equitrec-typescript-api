@@ -91,6 +91,30 @@ export class FicheNotationService {
         }
     }
 
+    static async getFichesNotationByCavalierAndCompetition(cavalierId: number, competitionId: number): Promise<FicheNotation[]> {
+        try {
+            const query = `
+                SELECT fn.idfichenotation, fn.cumulenote, fn.appreciation, fn.isvalidate, 
+                       fn.idcavalier, fn.idepreuve, c.nomcavalier, c.prenomcavalier, cl.nomclub,
+                       e.titre, comp.nomcompetition
+                FROM fichenotation fn
+                LEFT JOIN cavalier c ON fn.idcavalier = c.idcavalier
+                LEFT JOIN club cl ON c.idclub = cl.idclub
+                LEFT JOIN epreuve e ON fn.idepreuve = e.idepreuve
+                LEFT JOIN composer com ON e.idepreuve = com.idepreuve
+                LEFT JOIN competition comp ON com.idcompetition = comp.idcompetition
+                LEFT JOIN participer p ON p.idcavalier = fn.idcavalier AND p.idcompetition = comp.idcompetition
+                WHERE fn.idcavalier = $1 AND comp.idcompetition = $2
+                ORDER BY fn.idfichenotation ASC
+            `;
+            const result = await pool.query(query, [cavalierId, competitionId]);
+            return result.rows;
+        } catch (error) {
+            console.error('Erreur lors de la récupération des fiches de notation du cavalier pour la compétition:', error);
+            throw new Error('Erreur lors de la récupération des fiches de notation du cavalier pour la compétition');
+        }
+    }
+
     static async createFicheNotation(ficheData: CreateFicheNotationRequest): Promise<CreateFicheNotationResponse> {
         try {
             if (!ficheData.cumulenote && ficheData.cumulenote !== 0) {

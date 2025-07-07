@@ -105,6 +105,34 @@ export class FicheNotationController {
         }
     }
 
+    static async getFichesNotationByCavalierAndCompetition(req: Request, res: Response): Promise<void> {
+        try {
+            const cavalierId = parseInt(req.params.cavalierId);
+            const competitionId = parseInt(req.params.competitionId);
+            
+            if (isNaN(cavalierId) || isNaN(competitionId)) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID cavalier ou compétition invalide'
+                });
+                return;
+            }
+
+            const fiches = await FicheNotationService.getFichesNotationByCavalierAndCompetition(cavalierId, competitionId);
+            res.json({
+                success: true,
+                data: fiches,
+                message: 'Fiches de notation du cavalier pour la compétition récupérées avec succès'
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des fiches de notation du cavalier pour la compétition:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erreur lors de la récupération des fiches de notation du cavalier pour la compétition'
+            });
+        }
+    }
+
     static async createFicheNotation(req: Request, res: Response): Promise<void> {
         try {
             const nouvelleFiche = await FicheNotationService.createFicheNotation(req.body);
