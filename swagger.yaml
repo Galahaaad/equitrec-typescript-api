@@ -826,8 +826,7 @@ paths:
       description: |
         Récupère toutes les fiches de notation d'un cavalier spécifique pour une compétition donnée.
         Retourne les fiches avec les informations complètes du cavalier, club, épreuve et compétition.
-      security:
-        - bearerAuth: []
+        Cette route est publique et ne nécessite pas d'authentification.
       parameters:
         - in: path
           name: cavalierId
